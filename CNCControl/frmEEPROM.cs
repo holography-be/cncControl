@@ -33,11 +33,13 @@ namespace CNCControl
         public frmCNCMain frmBase;
         NumberStyles styles;
         bool nonNumberEntered;
+        int waitTime;
 
         public frmEEPROM()
         {
             InitializeComponent();            
             styles = NumberStyles.Number;
+            waitTime = 150;
         }
 
         private void EEPROM_Load(object sender, EventArgs e)
@@ -73,22 +75,24 @@ namespace CNCControl
             {
                 string strCommand = "";
                 strCommand = "M92 X" + txt_X_92.Text + " Y" + txt_Y_92.Text + " Z" + txt_Z_92.Text + " E" + txt_E_92.Text ;
-                frmBase.sendCommand(strCommand);
+                frmBase.sendCommand(strCommand,waitTime);
                 strCommand = "M203 X" + txt_X_203.Text + " Y" + txt_Y_203.Text + " Z" + txt_Z_203.Text + " E" + txt_E_203.Text;
-                frmBase.sendCommand(strCommand);
+                frmBase.sendCommand(strCommand, waitTime);
                 strCommand = "M201 X" + txt_X_201.Text + " Y" + txt_Y_201.Text + " Z" + txt_Z_201.Text + " E" + txt_E_201.Text;
-                frmBase.sendCommand(strCommand);
+                frmBase.sendCommand(strCommand, waitTime);
                 strCommand = "M204 S" + txt_S_204.Text;
-                frmBase.sendCommand(strCommand);
+                frmBase.sendCommand(strCommand, waitTime);
                 strCommand = "M205 X" + txt_X_205.Text + " Z" + txt_Z_205.Text + " E" + txt_E_205.Text + " S" + txt_S_205.Text + " T" + txt_T_205.Text + " B" + txt_B_205.Text;
-                frmBase.sendCommand(strCommand);
+                frmBase.sendCommand(strCommand, waitTime);
                 strCommand = "M206 X" + txt_X_206.Text + " Y" + txt_Y_206.Text + " Z" + txt_Z_206.Text;
-                frmBase.sendCommand(strCommand);
+                frmBase.sendCommand(strCommand, waitTime);
+                strCommand = "M210 L" + txt_MIN_210.Text + " O" + txt_OPERATION_210.Text + " H" + txt_MAX_210.Text;
+                frmBase.sendCommand(strCommand, waitTime);
                 // Save in EEPROM
-                frmBase.sendCommand("M500");
+                frmBase.sendCommand("M500",waitTime);
                 System.Threading.Thread.Sleep(250);
                 // reload values from EEPROM
-                frmBase.sendCommand("M501");
+                frmBase.sendCommand("M501",waitTime);
                 System.Threading.Thread.Sleep(250);
                 button1_Click(sender, e);
             }
@@ -97,7 +101,7 @@ namespace CNCControl
         private void button1_Click(object sender, EventArgs e)
         {
             strConfig.Clear();
-            string strTemp = frmBase.sendCommand("M503");
+            string strTemp = frmBase.sendCommand("M503",waitTime);
             foreach (string str in strTemp.Split('\n'))
             {
                 strConfig.Add(str);
@@ -109,7 +113,7 @@ namespace CNCControl
         {
             if (MessageBox.Show("Are you sure to restore default values ?", "Confirmation", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
             {
-                frmBase.sendCommand("M502");
+                frmBase.sendCommand("M502",waitTime);
                 System.Threading.Thread.Sleep(250);
                 button1_Click(sender, e);
             }
@@ -118,90 +122,65 @@ namespace CNCControl
         void ReadConfig() {
             string strParams = "";
             // Get M92
-            strParams = getLineWithContain(strConfig, "M92");
+            strParams = Utils.getLineWithContain(strConfig, "M92");
             if (strParams != "")
             {
-                txt_X_92.Text = getStringValue(strParams, "X");
-                txt_Y_92.Text = getStringValue(strParams, "Y");
-                txt_Z_92.Text = getStringValue(strParams, "Z");
-                txt_E_92.Text = getStringValue(strParams, "E");
+                txt_X_92.Text = Utils.getStringValue(strParams, "X");
+                txt_Y_92.Text = Utils.getStringValue(strParams, "Y");
+                txt_Z_92.Text = Utils.getStringValue(strParams, "Z");
+                txt_E_92.Text = Utils.getStringValue(strParams, "E");
             }
             // Get M203
-            strParams = getLineWithContain(strConfig, "M203");
+            strParams = Utils.getLineWithContain(strConfig, "M203");
             if (strParams != "")
             {
-                txt_X_203.Text = getStringValue(strParams, "X");
-                txt_Y_203.Text = getStringValue(strParams, "Y");
-                txt_Z_203.Text = getStringValue(strParams, "Z");
-                txt_E_203.Text = getStringValue(strParams, "E");
+                txt_X_203.Text = Utils.getStringValue(strParams, "X");
+                txt_Y_203.Text = Utils.getStringValue(strParams, "Y");
+                txt_Z_203.Text = Utils.getStringValue(strParams, "Z");
+                txt_E_203.Text = Utils.getStringValue(strParams, "E");
             }
             // Get M201
-            strParams = getLineWithContain(strConfig, "M201");
+            strParams = Utils.getLineWithContain(strConfig, "M201");
             if (strParams != "")
             {
-                txt_X_201.Text = getStringValue(strParams, "X");
-                txt_Y_201.Text = getStringValue(strParams, "Y");
-                txt_Z_201.Text = getStringValue(strParams, "Z");
-                txt_E_201.Text = getStringValue(strParams, "E");
+                txt_X_201.Text = Utils.getStringValue(strParams, "X");
+                txt_Y_201.Text = Utils.getStringValue(strParams, "Y");
+                txt_Z_201.Text = Utils.getStringValue(strParams, "Z");
+                txt_E_201.Text = Utils.getStringValue(strParams, "E");
             }
             // Get M204
-            strParams = getLineWithContain(strConfig, "M204");
+            strParams = Utils.getLineWithContain(strConfig, "M204");
             if (strParams != "")
             {
-                txt_S_204.Text = getStringValue(strParams, "S");
+                txt_S_204.Text = Utils.getStringValue(strParams, "S");
             }
             // Get M205
-            strParams = getLineWithContain(strConfig, "M205");
+            strParams = Utils.getLineWithContain(strConfig, "M205");
             if (strParams != "")
             {
-                txt_S_205.Text = getStringValue(strParams, "S");
-                txt_T_205.Text = getStringValue(strParams, "T");
-                txt_B_205.Text = getStringValue(strParams, "B");
-                txt_X_205.Text = getStringValue(strParams, "X");
-                txt_Z_205.Text = getStringValue(strParams, "Z");
-                txt_E_205.Text = getStringValue(strParams, "E");
+                txt_S_205.Text = Utils.getStringValue(strParams, "S");
+                txt_T_205.Text = Utils.getStringValue(strParams, "T");
+                txt_B_205.Text = Utils.getStringValue(strParams, "B");
+                txt_X_205.Text = Utils.getStringValue(strParams, "X");
+                txt_Z_205.Text = Utils.getStringValue(strParams, "Z");
+                txt_E_205.Text = Utils.getStringValue(strParams, "E");
             }
             // Get M206
-            strParams = getLineWithContain(strConfig, "M206");
+            strParams = Utils.getLineWithContain(strConfig, "M206");
             if (strParams != "")
             {
-                txt_X_206.Text = getStringValue(strParams, "X");
-                txt_Y_206.Text = getStringValue(strParams, "Y");
-                txt_Z_206.Text = getStringValue(strParams, "Z");
+                txt_X_206.Text = Utils.getStringValue(strParams, "X");
+                txt_Y_206.Text = Utils.getStringValue(strParams, "Y");
+                txt_Z_206.Text = Utils.getStringValue(strParams, "Z");
             }
-        }
-
-        string getLineWithContain(List<string> fullString, string subString)
-        {
-            foreach (string str in fullString) {
-                if (str.Contains(subString))
-                {
-                    return str;
-                }
-            }
-            return "";
-        }
-
-        string getStringValue(string fullString, string paramName)
-        {
-            return getValue(fullString, paramName).ToString();
-        }
-
-        double getValue(string fullString, string paramName)
-        {
-
-            string strTemp = paramName;
-            double dblTemp = 0;
-            if (fullString.Contains(strTemp))
+            // Get M210 (Laser Temp)
+            strParams = Utils.getLineWithContain(strConfig, "M210");
+            if (strParams != "")
             {
-                fullString += " "; // to be sure to extract last value
-                strTemp = fullString.Remove(0, fullString.LastIndexOf(strTemp) + strTemp.Length);
-                try
-                {
-                    dblTemp = Double.Parse(strTemp.Remove(strTemp.IndexOf(" ")), styles);
-                } catch(Exception e) {}
+                txt_MIN_210.Text = Utils.getStringValue(strParams, "L");
+                txt_OPERATION_210.Text = Utils.getStringValue(strParams, "O");
+                txt_MAX_210.Text = Utils.getStringValue(strParams, "H");
             }
-            return dblTemp;
         }
 
         private void txt_KeyDown(object sender, KeyEventArgs e)
@@ -247,7 +226,7 @@ namespace CNCControl
         {
             // Read values in EEPROM
             strConfig.Clear();
-            string strTemp = frmBase.sendCommand("M501");
+            string strTemp = frmBase.sendCommand("M501",waitTime);
             foreach (string str in strTemp.Split('\n'))
             {
                 strConfig.Add(str);

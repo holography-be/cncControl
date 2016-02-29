@@ -26,6 +26,7 @@ namespace CNCControl
         bool IgnoreKey;
         bool bWait;
         string serialString;
+        bool bRunning;
 
         public frmCNCMain()
         {
@@ -33,6 +34,7 @@ namespace CNCControl
             serialDelegate = new SetText(SetTextMethod);
             serialString = "";
             bWait = false;
+            bRunning = false;
             serialPort1.ReadBufferSize = 1024;
             serialPort1.WriteBufferSize = 1024;
             defColor = txtLaserTemp.BackColor;
@@ -95,7 +97,7 @@ namespace CNCControl
                 toolStripButton1.BackColor = Color.LightGreen;
                 isConnect = true;
                 toolStripButton1.Text = "Disconnect";
-                //timer2.Enabled = true;
+                timer2.Enabled = true;
                 timer1.Enabled = true;
                 serialPort1.WriteLine("M114");
                 System.Threading.Thread.Sleep(50);
@@ -120,15 +122,12 @@ namespace CNCControl
             CommandHistory.Add(textBox2.Text);
             IndexCommandHistory = CommandHistory.Count;
             //serialPort1.WriteLine(textBox2.Text);
-            textBox1.Text = sendCommand(textBox2.Text).Replace("\n",Environment.NewLine);     
-
-
-
+            textBox1.Text = sendCommand(textBox2.Text,100).Replace("\n",Environment.NewLine);     
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (Double.Parse(txtLaserTemp.Text) > Double.Parse(textBox7.Text))
+            if (Double.Parse(txtLaserTemp.Text) > Double.Parse(txtMaxLaserTemp.Text))
             {
                 bAlarmLaser = true;
                 this.Text = "ALARM - TEMP LASER";
@@ -150,71 +149,39 @@ namespace CNCControl
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            serialPort1.WriteLine("M114");
+            if (bRunning)
+            {
+                bWait = true;
+            }
+            else getStatus();
+        }
+
+        private void getStatus()
+        {
+            string reply = sendCommand("M114",1000);
+            textBox1.AppendText(reply + Environment.NewLine);
+            //DEST X:0.00 DEST Y:0.00 DEST Z:0.00 DEST E:0.00 TL:24.90 CURRENT X: 0.00 CURRENT Y:0.00 CURRENT Z:0.00 CURRENT E:0.00
+            txtX.Text = Utils.getStringValue(reply, "CURRENT X:");
+            txtY.Text = Utils.getStringValue(reply, "CURRENT Y:");
+            txtZ.Text = Utils.getStringValue(reply, "CURRENT Z:");
+            txtE.Text = Utils.getStringValue(reply, "CURRENT E:");
+            txtLaserTemp.Text = Utils.getStringValue(reply, "TL:");
+            bWait = false;
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            serialPort1.WriteLine("M121");
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            serialPort1.WriteLine("M500");
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            this.Invoke(serialDelegate, sendCommand("M501"));                       
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            this.Invoke(serialDelegate, sendCommand("M503"));      
+            sendCommand("M121",150);
         }
 
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
         {
-            IgnoreKey = false;
-            int CommandCount = CommandHistory.Count;
-            switch (e.KeyCode)
-            {
-                case Keys.Up:
-                    if (IndexCommandHistory > 0 && IndexCommandHistory <= CommandCount)
-                    {
-                        textBox2.Text = CommandHistory.ElementAt(IndexCommandHistory-1);
-                        textBox2.Select(textBox2.Text.Length, 0);
-                    }
-                    IgnoreKey = true;
-                    break;
 
-                case Keys.Down:
-                    if (IndexCommandHistory < CommandCount)
-                    {
-                        textBox2.Text = CommandHistory.ElementAt(IndexCommandHistory);
-                        IndexCommandHistory++;
-                        textBox2.Select(textBox2.Text.Length, 0);
-                    }
-                    else
-                    {
-                        textBox2.Text = "";
-                    }
-                    IgnoreKey = true;
-                    break;
-
-                case Keys.Enter:
-                    CommandHistory.Add(textBox2.Text);
-                    IndexCommandHistory = CommandHistory.Count;
-                    IgnoreKey = true;
-                    break;
-            }
         }
 
         private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
-            textBox1.Text = "";
-            textBox2.Select(textBox2.Text.Length, 0);
-            if (IgnoreKey) e.Handled = false;
+
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -222,11 +189,13 @@ namespace CNCControl
             textBox1.Text = "";
         }
 
-        public string sendCommand(string Command)
+        public string sendCommand(string Command,int waitTime)
         {
+            if (!serialPort1.IsOpen) return "";
+            Application.DoEvents();
             string reply = "";
             serialPort1.WriteLine(Command);
-            System.Threading.Thread.Sleep(50);
+            System.Threading.Thread.Sleep(waitTime);
             while (true)
             {
                 while (serialPort1.BytesToRead > 0)
@@ -236,6 +205,8 @@ namespace CNCControl
 
                 if(reply != String.Empty)
                 {
+                    //reply = reply.Replace("\n","");
+                    reply = reply.Replace("ok", "");
                     return reply;
                 }
             }
@@ -250,9 +221,63 @@ namespace CNCControl
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
+            if (!serialPort1.IsOpen) return;
+            timer2.Enabled = false;
             frmEEPROM frmEEPROM = new frmEEPROM();
             frmEEPROM.frmBase = this;
-            frmEEPROM.ShowDialog();
+            frmEEPROM.ShowDialog(this);
+            timer2.Enabled = true;
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            long currMillis = DateTime.Now.Ticks;
+            int currentIndex = 0;
+            bRunning = true;
+            timer2.Enabled = false;
+            double y = 0;
+            textBox1.Text = DateTime.Now.ToString();
+            string strCommand;
+            sendCommand("G0 X0 Y0 F9000",20);
+            while (true) {
+                
+                    strCommand = "G1 X100 F1000";
+                    //textBox1.AppendText(strCommand + Environment.NewLine);
+                    sendCommand(strCommand,20);
+                    currentIndex++;
+                y += 0.1;
+                strCommand = "G1 Y" + y.ToString().Trim() + " F1000";
+                //textBox1.AppendText(strCommand + Environment.NewLine);
+                sendCommand(strCommand,20);
+
+                    strCommand = "G1 X0 F1000";
+                    //textBox1.AppendText(strCommand + Environment.NewLine);
+                    sendCommand(strCommand,20);
+
+                y += 0.1;
+                strCommand = "G1 Y" + y.ToString().Trim() + " F1000";
+                //textBox1.AppendText(strCommand + Environment.NewLine);
+                sendCommand(strCommand,20);
+
+                if (DateTime.Now.Ticks - currMillis > 50000000)
+                {
+                    getStatus();
+                    currMillis = DateTime.Now.Ticks;
+                }
+
+                if (y > 100) break;
+            }
+            textBox1.AppendText(DateTime.Now.ToString());
+            bRunning = false;
+            timer2.Enabled = true;
+        }
+
+        private void serialPort1_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            if (e.EventType == SerialError.TXFull)
+            {
+                textBox1.AppendText("Error TX" + Environment.NewLine);
+            }
         }
     }
 }

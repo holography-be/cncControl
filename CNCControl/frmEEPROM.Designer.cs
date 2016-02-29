@@ -88,12 +88,21 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.txt_MAX_210 = new System.Windows.Forms.TextBox();
+            this.txt_OPERATION_210 = new System.Windows.Forms.TextBox();
+            this.txt_MIN_210 = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -289,7 +298,7 @@
             this.groupBox2.Controls.Add(this.label19);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(12, 81);
+            this.groupBox2.Location = new System.Drawing.Point(12, 80);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(784, 60);
             this.groupBox2.TabIndex = 12;
@@ -380,7 +389,7 @@
             this.groupBox3.Controls.Add(this.label22);
             this.groupBox3.Controls.Add(this.label3);
             this.groupBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox3.Location = new System.Drawing.Point(12, 150);
+            this.groupBox3.Location = new System.Drawing.Point(12, 148);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(784, 60);
             this.groupBox3.TabIndex = 13;
@@ -465,7 +474,7 @@
             this.groupBox4.Controls.Add(this.label25);
             this.groupBox4.Controls.Add(this.label4);
             this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox4.Location = new System.Drawing.Point(12, 219);
+            this.groupBox4.Location = new System.Drawing.Point(12, 216);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(784, 60);
             this.groupBox4.TabIndex = 14;
@@ -505,7 +514,7 @@
             this.groupBox5.Controls.Add(this.label10);
             this.groupBox5.Controls.Add(this.label9);
             this.groupBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox5.Location = new System.Drawing.Point(12, 288);
+            this.groupBox5.Location = new System.Drawing.Point(12, 284);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(633, 114);
             this.groupBox5.TabIndex = 15;
@@ -596,7 +605,7 @@
             this.groupBox6.Controls.Add(this.label28);
             this.groupBox6.Controls.Add(this.label5);
             this.groupBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox6.Location = new System.Drawing.Point(12, 411);
+            this.groupBox6.Location = new System.Drawing.Point(12, 406);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(633, 60);
             this.groupBox6.TabIndex = 16;
@@ -659,7 +668,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 491);
+            this.button1.Location = new System.Drawing.Point(14, 551);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(136, 23);
             this.button1.TabIndex = 17;
@@ -669,7 +678,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(519, 491);
+            this.button2.Location = new System.Drawing.Point(521, 551);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(136, 23);
             this.button2.TabIndex = 18;
@@ -679,7 +688,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(181, 491);
+            this.button3.Location = new System.Drawing.Point(183, 551);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(136, 23);
             this.button3.TabIndex = 19;
@@ -689,7 +698,7 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(688, 491);
+            this.button4.Location = new System.Drawing.Point(690, 551);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(106, 23);
             this.button4.TabIndex = 20;
@@ -699,7 +708,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(350, 491);
+            this.button5.Location = new System.Drawing.Point(352, 551);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(136, 23);
             this.button5.TabIndex = 21;
@@ -707,11 +716,87 @@
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
-            // EEPROM
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.txt_MAX_210);
+            this.groupBox7.Controls.Add(this.txt_OPERATION_210);
+            this.groupBox7.Controls.Add(this.txt_MIN_210);
+            this.groupBox7.Controls.Add(this.label23);
+            this.groupBox7.Controls.Add(this.label24);
+            this.groupBox7.Controls.Add(this.label30);
+            this.groupBox7.Controls.Add(this.label31);
+            this.groupBox7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox7.Location = new System.Drawing.Point(12, 472);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(680, 60);
+            this.groupBox7.TabIndex = 19;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "M210";
+            // 
+            // txt_MAX_210
+            // 
+            this.txt_MAX_210.Location = new System.Drawing.Point(561, 28);
+            this.txt_MAX_210.Name = "txt_MAX_210";
+            this.txt_MAX_210.Size = new System.Drawing.Size(100, 20);
+            this.txt_MAX_210.TabIndex = 18;
+            // 
+            // txt_OPERATION_210
+            // 
+            this.txt_OPERATION_210.Location = new System.Drawing.Point(388, 28);
+            this.txt_OPERATION_210.Name = "txt_OPERATION_210";
+            this.txt_OPERATION_210.Size = new System.Drawing.Size(100, 20);
+            this.txt_OPERATION_210.TabIndex = 17;
+            // 
+            // txt_MIN_210
+            // 
+            this.txt_MIN_210.Location = new System.Drawing.Point(175, 28);
+            this.txt_MIN_210.Name = "txt_MIN_210";
+            this.txt_MIN_210.Size = new System.Drawing.Size(100, 20);
+            this.txt_MIN_210.TabIndex = 16;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(501, 31);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(47, 13);
+            this.label23.TabIndex = 15;
+            this.label23.Text = "T° Max";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(288, 31);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(87, 13);
+            this.label24.TabIndex = 14;
+            this.label24.Text = "T° d\'opération";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(118, 31);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(44, 13);
+            this.label30.TabIndex = 13;
+            this.label30.Text = "T° Min";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label31.Location = new System.Drawing.Point(6, 31);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(99, 13);
+            this.label31.TabIndex = 4;
+            this.label31.Text = "Température Laser:";
+            // 
+            // frmEEPROM
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(811, 529);
+            this.ClientSize = new System.Drawing.Size(811, 586);
+            this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -723,7 +808,7 @@
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
-            this.Name = "EEPROM";
+            this.Name = "frmEEPROM";
             this.Text = "EEPROM";
             this.Load += new System.EventHandler(this.EEPROM_Load);
             this.groupBox1.ResumeLayout(false);
@@ -738,6 +823,8 @@
             this.groupBox5.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -804,5 +891,13 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.TextBox txt_MAX_210;
+        private System.Windows.Forms.TextBox txt_OPERATION_210;
+        private System.Windows.Forms.TextBox txt_MIN_210;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label label31;
     }
 }
