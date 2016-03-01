@@ -186,8 +186,7 @@ namespace CNCControl
         {
             if (MessageBox.Show("Are you sure to restore default values ?", "Confirmation", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
             {
-                frmParent.sendCommand("M502", waitTime);
-                System.Threading.Thread.Sleep(250);
+                frmParent.WriteSerial("M502");
                 button1_Click(sender, e);
             }
         }
@@ -299,12 +298,7 @@ namespace CNCControl
         {
             // Read values in EEPROM
             strConfig.Clear();
-            string strTemp = frmParent.sendCommand("M501", waitTime);
-            foreach (string str in strTemp.Split('\n'))
-            {
-                strConfig.Add(str);
-            }
-            ReadConfig();
+            frmParent.WriteSerial("M501");
         }
 
 

@@ -32,22 +32,27 @@ namespace CNCControl
         bool bRunning;
         public delegate void UpdatePositionDelegate(string str);
         UpdatePositionDelegate UpdatePositionAction;
-        public delegate void TransmitLEDDelegate();
-        TransmitLEDDelegate TX_LED;
-        public delegate void ReceiveLEDDelegate();
-        ReceiveLEDDelegate RX_LED;
-        private System.Timers.Timer TXLEDoff;
-        private System.Timers.Timer RXLEDoff;
+        public delegate void UpdateComReceiveTextDelegate(string str);
+        UpdateComReceiveTextDelegate UpdateComReceiveTextAction;
         Regex PositionRegex;
         public eMode CurrentMode;
-        frmEEPROM fEEPROM;
-        private Thread workThread;
+        frmEEPROM formEEPROM;
+        private Thread CommandThread;
+        List<string> gCodeCommands;
+        bool bCancel;
+        bool WaitingACK;
+
+        double curX;
+        double curY;
+        double curZ;
+        double curE;
+
 
         public frmCNCMain()
         {
             InitializeComponent();
             UpdatePositionAction = new UpdatePositionDelegate(UpdatePosition);
-
+            UpdateComReceiveTextAction = new UpdateComReceiveTextDelegate(UpdateComReceiveText);
             serialDelegate = new SetText(SetTextMethod);
             serialString = "";
             bWait = false;
@@ -66,7 +71,8 @@ namespace CNCControl
               ",]?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*);([-+]?[0-9]*[\\\\.,]" +
               "?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*)\\],T\\[([-+]?[0-9]*[\\\\.,]?[0-9]*)\\].*",
               RegexOptions.CultureInvariant | RegexOptions.Compiled
-            );     
+            );
+            bCancel = true;
         }
 
         public void UpdatePosition(string str)
@@ -160,9 +166,8 @@ namespace CNCControl
             }
             else 
             {
-                comPort.Close() ;
-                //timer2.Enabled = false;
                 TimerStatusUpdate.Enabled = false;
+                comPort.Close() ;               
                 toolStripButton1.BackColor = Color.Red;
                 isConnect = false;
                 toolStripButton1.Text = "Connect";
@@ -184,7 +189,7 @@ namespace CNCControl
         {
             if(comPort.IsOpen) 
             {
-                comPort.WriteLine(cmd);
+                comPort.WriteLine(cmd.ToUpper());
             }
         }
 
@@ -218,31 +223,10 @@ namespace CNCControl
             //}
 
 
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            if (bRunning)
-            {
-                bWait = true;
-            }
-            else getStatus();
-        }
-
-        private void getStatus()
-        {
-            string reply = sendCommand("M114",1000);
-            txtResults.AppendText(reply + Environment.NewLine);
-            //DEST X:0.00 DEST Y:0.00 DEST Z:0.00 DEST E:0.00 TL:24.90 CURRENT X: 0.00 CURRENT Y:0.00 CURRENT Z:0.00 CURRENT E:0.00
-            //txtX.Text = Utils.getStringValue(reply, "CURRENT X:");
-            //txtY.Text = Utils.getStringValue(reply, "CURRENT Y:");
-            //txtZ.Text = Utils.getStringValue(reply, "CURRENT Z:");
-            //txtE.Text = Utils.getStringValue(reply, "CURRENT E:");
-            txtLaserTemp.Text = Utils.getStringValue(reply, "TL:");
-            bWait = false;
-        }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            sendCommand("M121",150);
+            WriteSerial("M121");
         }
 
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
@@ -260,87 +244,13 @@ namespace CNCControl
             txtResults.Text = "";
         }
 
-        public string sendCommand(string Command,int waitTime)
-        {
-            if (!comPort.IsOpen) return "";
-            Application.DoEvents();
-            string reply = "";
-            comPort.WriteLine(Command);
-            System.Threading.Thread.Sleep(waitTime);
-            while (true)
-            {
-                while (comPort.BytesToRead > 0)
-                {
-                    reply += comPort.ReadExisting();
-                }
-
-                if(reply != String.Empty)
-                {
-                    //reply = reply.Replace("\n","");
-                    reply = reply.Replace("ok", "");
-                    return reply;
-                }
-            }
-        }
-
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             if (!comPort.IsOpen) return;
             TimerStatusUpdate.Enabled = false;
-            fEEPROM = new frmEEPROM();
-            fEEPROM.ShowDialog(this);
+            formEEPROM = new frmEEPROM();
+            formEEPROM.ShowDialog(this);
             TimerStatusUpdate.Enabled = true;
-        }
-
-        private void button3_Click_1(object sender, EventArgs e)
-        {
-            long currMillis = DateTime.Now.Ticks;
-            int currentIndex = 0;
-            bRunning = true;
-            timer2.Enabled = false;
-            double y = 0;
-            txtResults.Text = DateTime.Now.ToString();
-            string strCommand;
-            sendCommand("G0 X0 Y0 F9000",20);
-            while (true) {
-                
-                    strCommand = "G1 X100 F1000";
-                    //textBox1.AppendText(strCommand + Environment.NewLine);
-                    sendCommand(strCommand,20);
-                    currentIndex++;
-                y += 0.1;
-                strCommand = "G1 Y" + y.ToString().Trim() + " F1000";
-                //textBox1.AppendText(strCommand + Environment.NewLine);
-                sendCommand(strCommand,20);
-
-                    strCommand = "G1 X0 F1000";
-                    //textBox1.AppendText(strCommand + Environment.NewLine);
-                    sendCommand(strCommand,20);
-
-                y += 0.1;
-                strCommand = "G1 Y" + y.ToString().Trim() + " F1000";
-                //textBox1.AppendText(strCommand + Environment.NewLine);
-                sendCommand(strCommand,20);
-
-                if (DateTime.Now.Ticks - currMillis > 50000000)
-                {
-                    getStatus();
-                    currMillis = DateTime.Now.Ticks;
-                }
-
-                if (y > 100) break;
-            }
-            txtResults.AppendText(DateTime.Now.ToString());
-            bRunning = false;
-            timer2.Enabled = true;
-        }
-
-        private void serialPort1_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
-        {
-            if (e.EventType == SerialError.TXFull)
-            {
-                txtResults.AppendText("Error TX" + Environment.NewLine);
-            }
         }
 
         private void cbUpdate_CheckedChanged(object sender, EventArgs e)
@@ -357,9 +267,24 @@ namespace CNCControl
             //if (TimerStatusUpdate.Enabled)
             {
                 //TimerStatusUpdate.Enabled = false;
-                TimerStatusUpdate.Interval = 1000 / trackBar1.Value;
+                if (trackBar1.Value < 0)
+                {
+                    TimerStatusUpdate.Interval = 1000 / (-(trackBar1.Value-1));
+                    txtInterval.Text = ((double)(TimerStatusUpdate.Interval)/1000).ToString();
+                    TimerStatusUpdate.Enabled = true;
+                }
+                if (trackBar1.Value == 0)
+                {
+                    txtInterval.Text = "0";
+                    TimerStatusUpdate.Enabled = false;
+                }
+                if (trackBar1.Value > 0)
+                {
+                    TimerStatusUpdate.Interval = trackBar1.Value * 1000;
+                    txtInterval.Text = trackBar1.Value.ToString();
+                    TimerStatusUpdate.Enabled = true;
+                }
             }
-            txtInterval.Text = trackBar1.Value.ToString();
         }
 
         private void comPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -370,29 +295,34 @@ namespace CNCControl
             {
                 while (comPort.BytesToRead > 0)
                 {
+                    if (bCancel) return;
+
                     if (comPort.IsOpen) ACK = comPort.ReadLine();
                     ACK = ACK.ToUpper().Trim();
+
                     // Read EEPROM
                     if (CurrentMode == eMode.READEEPROM)
                     {
-
                         EEPROMConfig.Add(ACK);
                         if (ACK == "END_EEPROM")
                         {
                             CurrentMode = eMode.READY;
-                            Invoke(fEEPROM.ReadEEPROMValuesAction, EEPROMConfig);
+                            Invoke(formEEPROM.ReadEEPROMValuesAction, EEPROMConfig);
                         }
-                    }
-                    else if (ACK == "OK")
-                    {
-                        //txtResults.Text = "OK";
-                        //Invoke(RX_LED);
                     }
                     else if (ACK.StartsWith("D["))
                     {
                         Invoke(UpdatePositionAction, ACK);
                     }
-                    else if (ACK != "") { }
+                    else if (ACK == "OK") 
+                    {
+                        // Accusé de reception de commande
+                        WaitingACK = false;
+                    }
+                    else
+                    {
+                        Invoke(UpdateComReceiveTextAction, ACK);
+                    }
                 }
                 Application.DoEvents();
             }
@@ -403,48 +333,95 @@ namespace CNCControl
 
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        public void UpdateComReceiveText(string str)
         {
-            test frm = new test();
-            frm.Show(this);
-            Invoke(frm.SetTextDelegate, "Hello");
+            txtComReceive.AppendText(str + Environment.NewLine);
         }
+
 
         private void button5_Click(object sender, EventArgs e)
         {
             
         }
 
-        private void button4_Click_1(object sender, EventArgs e)
+        private void button12_Click(object sender, EventArgs e)
         {
-            test frm = new test();
-            frm.Show(this);
-            Invoke(frm.SetTextDelegate, "Hello");
+            WriteSerial("G92 X0 Y0 Z0");
+            curX = curY = curZ = 0;
         }
 
-        private void TransmitLED()
-        {            
-            lblTX.BackColor = System.Drawing.Color.LightGreen;
-            TXLEDoff.Enabled = true;
+        private void button8_Click(object sender, EventArgs e)
+        {
+            curX += 1;
+            WriteSerial("G0 X" + curX);
         }
 
-        private void TXLEDoffElapsed(object sender, EventArgs e)
+        private void button9_Click(object sender, EventArgs e)
         {
-            TXLEDoff.Enabled = false;
-            lblTX.BackColor = System.Drawing.Color.DarkGray;
+            curX += 10;
+            WriteSerial("G0 X" + curX);
         }
 
-        private void ReceiveLED()
+        private void button4_Click(object sender, EventArgs e)
         {
-            RXLEDoff.Enabled = true;
-            lblRX.BackColor = System.Drawing.Color.Khaki;
+            curX -= 1;
+            WriteSerial("G0 X" + curX);
         }
 
-        private void RXLEDoffElapsed(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
-            RXLEDoff.Enabled = false;
-            lblRX.BackColor = System.Drawing.Color.DarkGray;
+            curX -= 10;
+            WriteSerial("G0 X" + curX);
         }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            gCodeCommands = new List<string>();
+            foreach (string line in txtResults.Lines)
+            {
+                gCodeCommands.Add(line);
+            }
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            bCancel = false;
+            CommandThread = new Thread(gCodeThread);
+            CommandThread.Start();
+        }
+
+        private void gCodeThread()
+        {
+            foreach (string line in gCodeCommands)
+            {
+                if (bCancel) break;
+                try
+                {
+                    WriteSerial(line);
+                    while(WaitingACK == true) {  // on attend accusé de réception
+                	    Application.DoEvents();
+                        Thread.Sleep(5);
+                    }
+                    if(bCancel == true) break;                
+               	    WaitingACK = true;                    
+                }
+
+
+
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                    break;
+                }
+            }
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            bCancel = true;
+        }
+
+
 
     }
 }
