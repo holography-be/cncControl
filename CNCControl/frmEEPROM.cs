@@ -13,7 +13,44 @@ namespace CNCControl
 {
     public partial class frmEEPROM : Form
     {
-        /*
+
+
+        List<List<Double>> EEPROMParams;
+        List<string> strConfig;
+        NumberStyles styles;
+        bool nonNumberEntered;
+        int waitTime;
+        public delegate void ReadEEPROMValuesDelegate(List<String> EEPROMValues);
+        public delegate void WriteEEPROMValuesDelegate();
+        public ReadEEPROMValuesDelegate ReadEEPROMValuesAction;
+        public WriteEEPROMValuesDelegate WriteEEPROMValuesAction;
+        frmCNCMain frmParent;
+
+        public frmEEPROM()
+        {
+            InitializeComponent();            
+            styles = NumberStyles.Number;
+            waitTime = 150;
+            ReadEEPROMValuesAction = new ReadEEPROMValuesDelegate(ReadEEPROMValues);
+            WriteEEPROMValuesAction = new WriteEEPROMValuesDelegate(WriteEEPROMValues);
+
+        }
+
+        private void EEPROM_Load(object sender, EventArgs e)
+        {
+            strConfig = new List<string>();
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
+            frmParent = (frmCNCMain)this.Owner;
+        }
+
+        private void ReadEEPROMValues(List<string> EEPROMValues)
+        {
+            string[] tempArray;
+            strConfig = EEPROMValues;
+            EEPROMParams = new List<List<Double>>();
+            foreach (string str in strConfig)
+            {
+                /*
             echo:Stored settings retrieved
             echo:Steps per unit:
             echo:CONFIG M92 X134.74 Y134.74 Z4266.66 E200.00
@@ -28,24 +65,59 @@ namespace CNCControl
             echo:Home offset (mm):
             echo:CONFIG M206 X0.00 Y0.00 Z0.00 
          */
+                if (str.StartsWith("M"))
+                {
+                    tempArray = str.Split(';');
+                    switch (tempArray[0])
+                    {
+                        case "M92":
+                            txt_X_92.Text = tempArray[1];
+                            txt_Y_92.Text = tempArray[2];
+                            txt_Z_92.Text = tempArray[3];
+                            txt_E_92.Text = tempArray[4];
+                            break;
+                        case "M203":
+                            txt_X_203.Text = tempArray[1];
+                            txt_Y_203.Text = tempArray[2];
+                            txt_Z_203.Text = tempArray[3];
+                            txt_E_203.Text = tempArray[4];
+                            break;
+                        case "M201":
+                            txt_X_201.Text = tempArray[1];
+                            txt_Y_201.Text = tempArray[2];
+                            txt_Z_201.Text = tempArray[3];
+                            txt_E_201.Text = tempArray[4];
+                            break;
+                        case "M204":
+                            txt_S_204.Text = tempArray[1];                            
+                            break;
+                        case "M205":
+                            txt_S_205.Text = tempArray[1];
+                            txt_T_205.Text = tempArray[2];
+                            txt_B_205.Text = tempArray[3];
+                            txt_X_205.Text = tempArray[4];
+                            txt_Z_205.Text = tempArray[5];
+                            txt_E_205.Text = tempArray[6];
+                            break;
+                        case "M206":
+                            txt_X_206.Text = tempArray[1];
+                            txt_Y_206.Text = tempArray[2];
+                            txt_Z_206.Text = tempArray[3];
+                            break;
+                        case "M210":
+                            txt_MIN_210.Text = tempArray[1];
+                            txt_OPERATION_210.Text = tempArray[2];
+                            txt_MAX_210.Text = tempArray[3];
+                            break;
+                    }
+                }
+            }
 
-        List<string> strConfig;
-        public frmCNCMain frmBase;
-        NumberStyles styles;
-        bool nonNumberEntered;
-        int waitTime;
-
-        public frmEEPROM()
-        {
-            InitializeComponent();            
-            styles = NumberStyles.Number;
-            waitTime = 150;
         }
 
-        private void EEPROM_Load(object sender, EventArgs e)
+        private void WriteEEPROMValues()
         {
-            strConfig = new List<string>();
-            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
+
         }
 
         private string extractString(string from, string subString)
@@ -75,25 +147,24 @@ namespace CNCControl
             {
                 string strCommand = "";
                 strCommand = "M92 X" + txt_X_92.Text + " Y" + txt_Y_92.Text + " Z" + txt_Z_92.Text + " E" + txt_E_92.Text ;
-                frmBase.sendCommand(strCommand,waitTime);
+                frmParent.WriteSerial(strCommand);
                 strCommand = "M203 X" + txt_X_203.Text + " Y" + txt_Y_203.Text + " Z" + txt_Z_203.Text + " E" + txt_E_203.Text;
-                frmBase.sendCommand(strCommand, waitTime);
+                frmParent.WriteSerial(strCommand);
                 strCommand = "M201 X" + txt_X_201.Text + " Y" + txt_Y_201.Text + " Z" + txt_Z_201.Text + " E" + txt_E_201.Text;
-                frmBase.sendCommand(strCommand, waitTime);
+                frmParent.WriteSerial(strCommand);
                 strCommand = "M204 S" + txt_S_204.Text;
-                frmBase.sendCommand(strCommand, waitTime);
+                frmParent.WriteSerial(strCommand);
                 strCommand = "M205 X" + txt_X_205.Text + " Z" + txt_Z_205.Text + " E" + txt_E_205.Text + " S" + txt_S_205.Text + " T" + txt_T_205.Text + " B" + txt_B_205.Text;
-                frmBase.sendCommand(strCommand, waitTime);
+                frmParent.WriteSerial(strCommand);
                 strCommand = "M206 X" + txt_X_206.Text + " Y" + txt_Y_206.Text + " Z" + txt_Z_206.Text;
-                frmBase.sendCommand(strCommand, waitTime);
+                frmParent.WriteSerial(strCommand);
                 strCommand = "M210 L" + txt_MIN_210.Text + " O" + txt_OPERATION_210.Text + " H" + txt_MAX_210.Text;
-                frmBase.sendCommand(strCommand, waitTime);
+                frmParent.WriteSerial(strCommand);
                 // Save in EEPROM
-                frmBase.sendCommand("M500",waitTime);
-                System.Threading.Thread.Sleep(250);
+                frmParent.WriteSerial("M500");
+                //System.Threading.Thread.Sleep(250);
                 // reload values from EEPROM
-                frmBase.sendCommand("M501",waitTime);
-                System.Threading.Thread.Sleep(250);
+                frmParent.WriteSerial("M501");
                 button1_Click(sender, e);
             }
         }
@@ -101,19 +172,21 @@ namespace CNCControl
         private void button1_Click(object sender, EventArgs e)
         {
             strConfig.Clear();
-            string strTemp = frmBase.sendCommand("M503",waitTime);
-            foreach (string str in strTemp.Split('\n'))
-            {
-                strConfig.Add(str);
-            }
-            ReadConfig();
+            frmParent.CurrentMode = eMode.READEEPROM;
+            frmParent.WriteSerial("M503");
+            //string strTemp = frmBase.sendCommand("M503",waitTime);
+            //foreach (string str in strTemp.Split('\n'))
+            //{
+            //    strConfig.Add(str);
+            //}
+            //ReadConfig();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure to restore default values ?", "Confirmation", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
             {
-                frmBase.sendCommand("M502",waitTime);
+                frmParent.sendCommand("M502", waitTime);
                 System.Threading.Thread.Sleep(250);
                 button1_Click(sender, e);
             }
@@ -226,7 +299,7 @@ namespace CNCControl
         {
             // Read values in EEPROM
             strConfig.Clear();
-            string strTemp = frmBase.sendCommand("M501",waitTime);
+            string strTemp = frmParent.sendCommand("M501", waitTime);
             foreach (string str in strTemp.Split('\n'))
             {
                 strConfig.Add(str);
