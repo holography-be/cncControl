@@ -20,20 +20,16 @@ namespace CNCControl
     {
 
         bool isConnect = false;
-        public delegate void SetText(string str);
-        public SetText serialDelegate;
         Color defColor;
-        bool bAlarmLaser = false;
-        List<string> CommandHistory;
-        int IndexCommandHistory;
-        bool IgnoreKey;
-        bool bWait;
-        string serialString;
         bool bRunning;
+
+#region Declare Delegate
         public delegate void UpdatePositionDelegate(string str);
         UpdatePositionDelegate UpdatePositionAction;
         public delegate void UpdateComReceiveTextDelegate(string str);
-        UpdateComReceiveTextDelegate UpdateComReceiveTextAction;
+        UpdateComReceiveTextDelegate UpdateComReceiveTextAction; 
+#endregion
+
         Regex PositionRegex;
         public eMode CurrentMode;
         frmEEPROM formEEPROM;
@@ -51,19 +47,15 @@ namespace CNCControl
         public frmCNCMain()
         {
             InitializeComponent();
+            
+#region Define Delegate
             UpdatePositionAction = new UpdatePositionDelegate(UpdatePosition);
-            UpdateComReceiveTextAction = new UpdateComReceiveTextDelegate(UpdateComReceiveText);
-            serialDelegate = new SetText(SetTextMethod);
-            serialString = "";
-            bWait = false;
-            bRunning = false;
+            UpdateComReceiveTextAction = new UpdateComReceiveTextDelegate(UpdateComReceiveText); 
+#endregion
+
             comPort.ReadBufferSize = 1024;
             comPort.WriteBufferSize = 1024;
             defColor = txtLaserTemp.BackColor;
-            TXLEDoff = new System.Timers.Timer(10);
-            TXLEDoff.Elapsed += TXLEDoffElapsed;
-            RXLEDoff = new System.Timers.Timer(10);
-            RXLEDoff.Elapsed += RXLEDoffElapsed; 
             // Regex pour status D[xxx;yyy;zzz;eee],C[xxx;yyy;zzz;eee],T[temp]
             PositionRegex = new Regex(
               "D\\[([-+]?[0-9]*[\\\\.,]?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0" +
@@ -73,6 +65,7 @@ namespace CNCControl
               RegexOptions.CultureInvariant | RegexOptions.Compiled
             );
             bCancel = true;
+            bRunning = false;
         }
 
         public void UpdatePosition(string str)
@@ -112,24 +105,6 @@ namespace CNCControl
 
             }
             catch (Exception ex) { MessageBox.Show(str, ex.Message); }
-        }
-
-        public void SetTextMethod(string str)
-        {
-            bWait = true;
-            NumberStyles styles;
-            styles = NumberStyles.Number;
-            string strTemp;
-            if (txtResults.Text.Length > 20000) txtResults.Text = txtResults.Text.Substring(10000);
-            str = str.Replace("\n", Environment.NewLine);
-            txtResults.AppendText(DateTime.Now.ToString("HH:MM:ss") + Environment.NewLine + " " + str);
-            //textBox1.AppendText(str);
-            if (str.Contains("TL:"))
-            {
-                strTemp = str.Remove(0, str.LastIndexOf("TL:") + 3);
-                txtLaserTemp.Text = Double.Parse(strTemp.Remove(strTemp.IndexOf(" ")),styles).ToString();
-            }
-            bWait = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -178,11 +153,7 @@ namespace CNCControl
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //CommandHistory.Add(textBox2.Text);
-            //IndexCommandHistory = CommandHistory.Count;
-            //serialPort1.WriteLine(textBox2.Text);
             WriteSerial(txtCommand.Text);
-            //textBox1.Text = sendCommand(textBox2.Text,100).Replace("\n",Environment.NewLine);     
         }
 
         public void WriteSerial(string cmd)
@@ -203,45 +174,16 @@ namespace CNCControl
                     }
             }
         }
-            //if (Double.Parse(txtLaserTemp.Text) > Double.Parse(txtMaxLaserTemp.Text))
-            //{
-            //    bAlarmLaser = true;
-            //    this.Text = "ALARM - TEMP LASER";
-            //    if (this.BackColor == Color.Red)
-            //    {
-            //        txtLaserTemp.BackColor = defColor;
-            //    }
-            //    else
-            //    {
-            //        txtLaserTemp.BackColor = Color.Red;
-            //    }
-            //    Console.Beep(5000, 100); ;
-            //} else if (bAlarmLaser == true) {
-            //    this.Text = "CNC Main Control";
-            //    txtLaserTemp.BackColor = defColor;
-            //    bAlarmLaser = false;
-            //}
-
-
 
         private void button2_Click(object sender, EventArgs e)
         {
             WriteSerial("M121");
         }
 
-        private void textBox2_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
-
-        private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
-        {
-
-        }
-
         private void button6_Click(object sender, EventArgs e)
         {
             txtResults.Text = "";
+            txtComReceive.Text = "";
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -264,9 +206,7 @@ namespace CNCControl
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            //if (TimerStatusUpdate.Enabled)
             {
-                //TimerStatusUpdate.Enabled = false;
                 if (trackBar1.Value < 0)
                 {
                     TimerStatusUpdate.Interval = 1000 / (-(trackBar1.Value-1));
@@ -295,7 +235,6 @@ namespace CNCControl
             {
                 while (comPort.BytesToRead > 0)
                 {
-                    if (bCancel) return;
 
                     if (comPort.IsOpen) ACK = comPort.ReadLine();
                     ACK = ACK.ToUpper().Trim();
@@ -330,7 +269,7 @@ namespace CNCControl
 
         private void comPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-
+            Invoke(UpdateComReceiveTextAction, e.ToString());
         }
 
         public void UpdateComReceiveText(string str)
@@ -338,12 +277,7 @@ namespace CNCControl
             txtComReceive.AppendText(str + Environment.NewLine);
         }
 
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            
-        }
-
+        #region Joggle Control
         private void button12_Click(object sender, EventArgs e)
         {
             WriteSerial("G92 X0 Y0 Z0");
@@ -377,14 +311,57 @@ namespace CNCControl
         private void button13_Click(object sender, EventArgs e)
         {
             gCodeCommands = new List<string>();
-            foreach (string line in txtResults.Lines)
+            int l = 0;
+            Random rnd = new Random();
+            for (double x = 0; x < 100; x += 0.09)
             {
-                gCodeCommands.Add(line);
+               
+
+
+                gCodeCommands.Add("G1 X" + x.ToString()+ " L" + rnd.Next(0,256)   + " F2000");
             }
+            //foreach (string line in txtResults.Lines)  + " L" + rnd.Next(0,256) 
+            //{
+            //    gCodeCommands.Add(line);
+            //}
         }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            WriteSerial("M18");
+            bCancel = true;
+            bRunning = false;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            curY -= 1;
+            WriteSerial("G0 Y" + curY);
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            curY -= 10;
+            WriteSerial("G0 Y" + curY);
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            curY += 1;
+            WriteSerial("G0 Y" + curY);
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            curY += 10;
+            WriteSerial("G0 Y" + curY);
+        } 
+        #endregion
+
 
         private void button14_Click(object sender, EventArgs e)
         {
+            WriteSerial("M17");
             bCancel = false;
             CommandThread = new Thread(gCodeThread);
             CommandThread.Start();
@@ -392,6 +369,8 @@ namespace CNCControl
 
         private void gCodeThread()
         {
+            bRunning = true;
+            Console.WriteLine("Start: " + DateTime.Now);
             foreach (string line in gCodeCommands)
             {
                 if (bCancel) break;
@@ -400,25 +379,21 @@ namespace CNCControl
                     WriteSerial(line);
                     while(WaitingACK == true) {  // on attend accusé de réception
                 	    Application.DoEvents();
-                        Thread.Sleep(5);
+                        //Thread.Sleep(5);
                     }
                     if(bCancel == true) break;                
-               	    WaitingACK = true;                    
+               	    WaitingACK = true;
+                    Invoke(UpdateComReceiveTextAction, line);
                 }
-
-
-
                 catch (Exception e)
                 {
                     MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                    bCancel = true;
                     break;
                 }
             }
-        }
-
-        private void button15_Click(object sender, EventArgs e)
-        {
-            bCancel = true;
+            bRunning = false;
+            Console.WriteLine("End: " + DateTime.Now);
         }
 
 

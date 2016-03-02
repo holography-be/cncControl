@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CNCControl", "CNCControl\CNCControl.csproj", "{94B900A8-0139-4739-8D71-E27E8200A694}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessing", "ImageProcessing\ImageProcessing.csproj", "{BB14D35A-DCF3-48D5-8AA5-97E544F5BDC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{94B900A8-0139-4739-8D71-E27E8200A694}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94B900A8-0139-4739-8D71-E27E8200A694}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94B900A8-0139-4739-8D71-E27E8200A694}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB14D35A-DCF3-48D5-8AA5-97E544F5BDC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB14D35A-DCF3-48D5-8AA5-97E544F5BDC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB14D35A-DCF3-48D5-8AA5-97E544F5BDC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB14D35A-DCF3-48D5-8AA5-97E544F5BDC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

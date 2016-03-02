@@ -174,12 +174,6 @@ namespace CNCControl
             strConfig.Clear();
             frmParent.CurrentMode = eMode.READEEPROM;
             frmParent.WriteSerial("M503");
-            //string strTemp = frmBase.sendCommand("M503",waitTime);
-            //foreach (string str in strTemp.Split('\n'))
-            //{
-            //    strConfig.Add(str);
-            //}
-            //ReadConfig();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -260,7 +254,7 @@ namespace CNCControl
             // Initialize the flag to false.
             nonNumberEntered = false;
             // Determine whether the keystroke is a number from the top of the keyboard.
-            if ((e.KeyCode < Keys.D0 || e.KeyCode > Keys.D9) && (e.KeyValue != 190)&&(e.KeyValue != 188))
+            if ((e.KeyCode < Keys.D0 || e.KeyCode > Keys.D9) && (e.KeyValue != 190) && (e.KeyValue != 188))
             {
                 // Determine whether the keystroke is a number from the keypad.
                 if ((e.KeyCode < Keys.NumPad0 || e.KeyCode > Keys.NumPad9) && e.KeyValue != 190 && e.KeyValue != 188)
@@ -275,10 +269,10 @@ namespace CNCControl
                 }
             }
             //If shift key was pressed, it's not a number.
-            if (Control.ModifierKeys == Keys.Shift)
-            {
-                nonNumberEntered = true;
-            }
+            //if (Control.ModifierKeys == Keys.Shift)
+            //{
+            //    nonNumberEntered = true;
+            //}
             // If already a decimal point 
             if ((e.KeyValue == 190 || e.KeyValue == 188) && ((TextBox)sender).Text.Contains(".")) nonNumberEntered = true;
         }
