@@ -72,6 +72,8 @@ namespace CNCControl
             bCancel = true;
             bRunning = false;
             cbDPI.SelectedIndex = 0;
+            cbStepSize.SelectedIndex = 0;
+            cbMode.SelectedIndex = 1;
         }
 
         public void UpdatePosition(string str)
@@ -416,7 +418,7 @@ namespace CNCControl
             Console.WriteLine("End: " + DateTime.Now);
         }
 
-        private string gCodeFromBitMap(Bitmap bitmapPicture, double orgX=0.0, double orgY=0.0, int FeedRate=4500, int DPI = 72)
+        private string *gCodeFromBitMap(Bitmap bitmapPicture, double orgX=0.0, double orgY=0.0, int FeedRate=4500, int DPI = 72, int Mode = 1)
         {
             // open tempFile
             StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
@@ -426,12 +428,12 @@ namespace CNCControl
             int firstPixel;
             double currentX = 0.0;
             double currentY = orgY;
-            double incX = Math.Round(1/(DPI/25.4),2);  // convert en mm, déterminer taille d'un pixel, arrondi au 1/100 de mm
+            double incX = Math.Round(1 / (DPI / 25.4), 2);  // convert en mm, déterminer taille d'un pixel, arrondi au 1/100 de mm
             double targetX;   // pour le 1er pixel
             Image8Bit img = new Image8Bit(bitmapPicture);
             var draw = pictureBox1.CreateGraphics();
             var pen = new Pen(Color.LightGreen, 1.0F);
-            for(int y=0; y < img.Height; y++)
+            for (int y = 0; y < img.Height; y++)
             {
                 draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
                 previousPixelColor = firstPixel = img.GetPixel(0, y).B;  // 1er pixel
@@ -441,7 +443,7 @@ namespace CNCControl
                 targetX = 0.0 - incX;   // pour le 1er pixel             
                 //
                 // TODO : Optimiser le sens d'impression
-                for(int x=0; x< img.Width; x++)
+                for (int x = 0; x < img.Width; x++)
                 {
                     currentPixelColor = img.GetPixel(x, y).B;
                     if (currentPixelColor == previousPixelColor)
@@ -458,11 +460,12 @@ namespace CNCControl
                         targetX = orgX + ((double)x * incX);
                     }
                 }
-                if (firstPixel != -1) { // on n'a pas détecter d'autre couleur pour la ligne en cours
+                if (firstPixel != -1)
+                { // on n'a pas détecter d'autre couleur pour la ligne en cours
                     outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + (FeedRate).ToString().Trim());
                     //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
                 }
-                currentY = y ;  // on considère qu'un pixel est carré
+                currentY = y;  // on considère qu'un pixel est carré
                 //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + (FeedRate).ToString().Trim());
                 //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
                 pictureBox1.Invalidate();
@@ -473,6 +476,35 @@ namespace CNCControl
             img.Dispose();
             img = null;
             return strReturn;
+
+            ////////// open tempFile
+            ////////StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
+            ////////string strReturn = "";
+            ////////int pixelLevel;
+            ////////double pixelSize = Math.Round(1/(DPI/25.4),2);  // convert en mm, déterminer taille d'un pixel, arrondi au 1/100 de mm
+            ////////Image8Bit img = new Image8Bit(bitmapPicture);
+            ////////var draw = pictureBox1.CreateGraphics();
+            ////////var pen = new Pen(Color.LightGreen, 1.0F);
+            ////////for (int y = 0; y < img.Height; y++)
+            ////////{
+            ////////    draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
+            ////////    for (int x = 0; x < img.Width; x++)
+            ////////    {
+            ////////        // get pixel
+            ////////        pixelLevel = img.GetPixel(x, y).B;
+            ////////        strReturn += " " + pixelLevel.ToString();
+            ////////    }
+            ////////    //outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + (FeedRate).ToString().Trim());
+            ////////    outputFile.WriteLine(strReturn);
+            ////////    strReturn = "";
+            ////////    Application.DoEvents();
+            ////////    pictureBox1.Invalidate();
+            ////////}
+            ////////outputFile.Close();
+            ////////outputFile.Dispose();
+            ////////img.Dispose();
+            ////////img = null;
+            ////////return strReturn;
         }
 
         private void button16_Click(object sender, EventArgs e)
@@ -487,13 +519,15 @@ namespace CNCControl
             {
                 pictureBox1.BackgroundImage = new Bitmap(dlg.OpenFile());
                 imageToPrint = new Bitmap(dlg.OpenFile());
+                setSizeOfImage();
             }
 
             dlg.Dispose();
         }
 
         private void button17_Click(object sender, EventArgs e)
-        {
+        {                    
+            string temp = "";
             txtGCodePreview.Visible = false;
             if (pictureBox1.BackgroundImage != null)
             {
@@ -507,7 +541,7 @@ namespace CNCControl
                     {
                         DPI = int.Parse(cbDPI.SelectedItem.ToString());
                     }
-                    string temp = "";
+
                     gCodeFromPicture = new List<string>();
                     temp = gCodeFromBitMap(imageToPrint,FeedRate:9000,DPI:DPI);
                     //foreach (string line in )
@@ -533,23 +567,6 @@ namespace CNCControl
             }
         }
 
-        private void button19_Click(object sender, EventArgs e)
-        {
-            float xx = (float)pictureBox1.Width;
-            float yy = (float)pictureBox1.Height;
-            using (var draw = pictureBox1.CreateGraphics())
-            {
-                for (int y = 0; y <= pictureBox1.Height; y++)
-                {
-                    using (var pen = new Pen(Color.LightGreen, 1.0F))
-                    {
-                        draw.DrawLine(pen, 0, y,xx,y);
-                    }
-                    pictureBox1.Invalidate();
-                }
-            }
-        }
-
         private void button18_Click(object sender, EventArgs e)
         {
             txtGCodePreview.Visible = true;
@@ -562,5 +579,26 @@ namespace CNCControl
             Cursor.Position = Cursor.Position;
         }
 
+        private void txtMaxLaserTemp_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cbDPI_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (imageToPrint != null) {
+                setSizeOfImage();
+            }
+
+        }
+
+        private void setSizeOfImage()
+        {
+            double DPI = double.Parse(cbDPI.SelectedItem.ToString());
+            txtImgSizePixelX.Text = imageToPrint.Width.ToString();
+            txtImgSizePixelY.Text = imageToPrint.Height.ToString();
+            txtImgSizeX.Text = ((double)(imageToPrint.Width / DPI) * 2.54).ToString("0.0#"); //.ToString("0.###");
+            txtImgSizeY.Text = ((double)(imageToPrint.Height / DPI) * 2.54).ToString("0.0#"); //.ToString("0.###");
+        }
     }
 }

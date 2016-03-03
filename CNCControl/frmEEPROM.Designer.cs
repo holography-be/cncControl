@@ -379,6 +379,9 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox3.Controls.Add(this.txt_E_201);
             this.groupBox3.Controls.Add(this.label29);
             this.groupBox3.Controls.Add(this.txt_Z_201);
@@ -391,13 +394,14 @@
             this.groupBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox3.Location = new System.Drawing.Point(12, 148);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(784, 60);
+            this.groupBox3.Size = new System.Drawing.Size(784, 62);
             this.groupBox3.TabIndex = 13;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "M201";
             // 
             // txt_E_201
             // 
+            this.txt_E_201.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txt_E_201.Location = new System.Drawing.Point(657, 23);
             this.txt_E_201.Name = "txt_E_201";
             this.txt_E_201.Size = new System.Drawing.Size(100, 20);
@@ -470,6 +474,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox4.Controls.Add(this.txt_S_204);
             this.groupBox4.Controls.Add(this.label25);
             this.groupBox4.Controls.Add(this.label4);
