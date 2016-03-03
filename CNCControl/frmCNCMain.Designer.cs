@@ -89,12 +89,14 @@
             this.txtImgSizeX = new System.Windows.Forms.TextBox();
             this.txtImgSizeY = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.cbMode = new System.Windows.Forms.ComboBox();
+            this.txtFeedRate = new System.Windows.Forms.TextBox();
             this.displayE = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayZ = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayY = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayX = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.txtLaserTemp = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.cbMode = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.statusStrip1.SuspendLayout();
@@ -530,6 +532,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.label6);
+            this.tabPage2.Controls.Add(this.txtFeedRate);
             this.tabPage2.Controls.Add(this.cbMode);
             this.tabPage2.Controls.Add(this.label5);
             this.tabPage2.Controls.Add(this.txtImgSizeY);
@@ -568,10 +572,11 @@
             "72",
             "150",
             "300"});
-            this.cbDPI.Location = new System.Drawing.Point(359, 93);
+            this.cbDPI.Location = new System.Drawing.Point(359, 35);
             this.cbDPI.Name = "cbDPI";
-            this.cbDPI.Size = new System.Drawing.Size(58, 21);
+            this.cbDPI.Size = new System.Drawing.Size(92, 21);
             this.cbDPI.TabIndex = 5;
+            this.cbDPI.Text = "150";
             this.cbDPI.SelectedIndexChanged += new System.EventHandler(this.cbDPI_SelectedIndexChanged);
             // 
             // pictureBox1
@@ -586,9 +591,9 @@
             // 
             // button18
             // 
-            this.button18.Location = new System.Drawing.Point(359, 64);
+            this.button18.Location = new System.Drawing.Point(358, 319);
             this.button18.Name = "button18";
-            this.button18.Size = new System.Drawing.Size(113, 23);
+            this.button18.Size = new System.Drawing.Size(124, 23);
             this.button18.TabIndex = 2;
             this.button18.Text = "gCode preview";
             this.button18.UseVisualStyleBackColor = true;
@@ -596,9 +601,9 @@
             // 
             // button17
             // 
-            this.button17.Location = new System.Drawing.Point(359, 35);
+            this.button17.Location = new System.Drawing.Point(358, 290);
             this.button17.Name = "button17";
-            this.button17.Size = new System.Drawing.Size(113, 23);
+            this.button17.Size = new System.Drawing.Size(124, 23);
             this.button17.TabIndex = 1;
             this.button17.Text = "Generate gCode";
             this.button17.UseVisualStyleBackColor = true;
@@ -608,7 +613,7 @@
             // 
             this.button16.Location = new System.Drawing.Point(359, 6);
             this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(113, 23);
+            this.button16.Size = new System.Drawing.Size(123, 23);
             this.button16.TabIndex = 0;
             this.button16.Text = "Load image";
             this.button16.UseVisualStyleBackColor = true;
@@ -683,28 +688,28 @@
             // 
             // txtImgSizePixelX
             // 
-            this.txtImgSizePixelX.Location = new System.Drawing.Point(358, 120);
+            this.txtImgSizePixelX.Location = new System.Drawing.Point(358, 62);
             this.txtImgSizePixelX.Name = "txtImgSizePixelX";
             this.txtImgSizePixelX.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizePixelX.TabIndex = 7;
             // 
             // txtImgSizePixelY
             // 
-            this.txtImgSizePixelY.Location = new System.Drawing.Point(423, 120);
+            this.txtImgSizePixelY.Location = new System.Drawing.Point(423, 62);
             this.txtImgSizePixelY.Name = "txtImgSizePixelY";
             this.txtImgSizePixelY.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizePixelY.TabIndex = 8;
             // 
             // txtImgSizeX
             // 
-            this.txtImgSizeX.Location = new System.Drawing.Point(358, 147);
+            this.txtImgSizeX.Location = new System.Drawing.Point(358, 89);
             this.txtImgSizeX.Name = "txtImgSizeX";
             this.txtImgSizeX.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizeX.TabIndex = 9;
             // 
             // txtImgSizeY
             // 
-            this.txtImgSizeY.Location = new System.Drawing.Point(423, 147);
+            this.txtImgSizeY.Location = new System.Drawing.Point(423, 89);
             this.txtImgSizeY.Name = "txtImgSizeY";
             this.txtImgSizeY.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizeY.TabIndex = 10;
@@ -712,11 +717,31 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(423, 96);
+            this.label5.Location = new System.Drawing.Point(457, 38);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(25, 13);
             this.label5.TabIndex = 11;
             this.label5.Text = "DPI";
+            // 
+            // cbMode
+            // 
+            this.cbMode.FormattingEnabled = true;
+            this.cbMode.Items.AddRange(new object[] {
+            "Mode 1",
+            "Mode 2"});
+            this.cbMode.Location = new System.Drawing.Point(358, 208);
+            this.cbMode.Name = "cbMode";
+            this.cbMode.Size = new System.Drawing.Size(124, 21);
+            this.cbMode.TabIndex = 12;
+            this.cbMode.Text = "Mode 1";
+            // 
+            // txtFeedRate
+            // 
+            this.txtFeedRate.Location = new System.Drawing.Point(359, 251);
+            this.txtFeedRate.Name = "txtFeedRate";
+            this.txtFeedRate.Size = new System.Drawing.Size(123, 20);
+            this.txtFeedRate.TabIndex = 13;
+            this.txtFeedRate.Text = "4500";
             // 
             // displayE
             // 
@@ -803,16 +828,14 @@
             this.txtLaserTemp.TabStop = false;
             this.txtLaserTemp.Value = "";
             // 
-            // cbMode
+            // label6
             // 
-            this.cbMode.FormattingEnabled = true;
-            this.cbMode.Items.AddRange(new object[] {
-            "Mode 1",
-            "Mode 2"});
-            this.cbMode.Location = new System.Drawing.Point(478, 38);
-            this.cbMode.Name = "cbMode";
-            this.cbMode.Size = new System.Drawing.Size(108, 21);
-            this.cbMode.TabIndex = 12;
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(359, 232);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(49, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Feedrate";
             // 
             // frmCNCMain
             // 
@@ -924,6 +947,8 @@
         private System.Windows.Forms.TextBox txtImgSizeX;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox cbMode;
+        private System.Windows.Forms.TextBox txtFeedRate;
+        private System.Windows.Forms.Label label6;
     }
 }
 
