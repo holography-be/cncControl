@@ -457,7 +457,7 @@ namespace CNCControl
                         if (totalPixel == Const.MaxPixelPerCommandLine || remainPixel == 0)
                         {
                             // Nouveau segment
-                            outputFile.WriteLine("G5"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " P" + strPixelLevel);
+                            outputFile.WriteLine("G5"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " S" + incX.ToString("#0.00")  + " P" + strPixelLevel);
                             totalPixel = 0;
                             strPixelLevel = "";
                         } 
