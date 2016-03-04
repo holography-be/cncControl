@@ -450,16 +450,16 @@ namespace CNCControl
                     outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
                     while (remainPixel > 0)
                     {                        
-                        currentPixelColor = img.GetPixel(x, y).B;
-                        strPixelLevel += currentPixelColor.ToString() + ";";
+                        currentPixelColor = img.GetPixel(x++, y).B;
                         totalPixel++;
                         remainPixel--;
-                        strPixelLevel += currentPixelColor.ToString() + ";";
+                        strPixelLevel += currentPixelColor.ToString("X2");
                         if (totalPixel == Const.MaxPixelPerCommandLine || remainPixel == 0)
                         {
                             // Nouveau segment
-                            outputFile.WriteLine("A"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " L" + totalPixel.ToString().Trim() + " " + strPixelLevel);
+                            outputFile.WriteLine("G5"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " P" + strPixelLevel);
                             totalPixel = 0;
+                            strPixelLevel = "";
                         } 
                         currentX += incX;                       
                     }
