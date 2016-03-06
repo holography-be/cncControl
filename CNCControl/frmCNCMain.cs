@@ -50,6 +50,8 @@ namespace CNCControl
         Bitmap imageToPrint;
         List<string> gCodeFromPicture;
 
+        NumberStyles floatStyles;
+
         public frmCNCMain()
         {
             InitializeComponent();
@@ -58,7 +60,8 @@ namespace CNCControl
             UpdatePositionAction = new UpdatePositionDelegate(UpdatePosition);
             UpdateComReceiveTextAction = new UpdateComReceiveTextDelegate(UpdateComReceiveText); 
 #endregion
-
+            floatStyles = NumberStyles.Number;
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
             comPort.ReadBufferSize = 1024;
             comPort.WriteBufferSize = 1024;
             defColor = txtLaserTemp.BackColor;
@@ -85,6 +88,8 @@ namespace CNCControl
             double me, we;
             double tempLaser;
 
+            if (cbUpdate.Checked != true) return;
+            
             try
             {
                 MatchCollection matches = PositionRegex.Matches(str);
@@ -123,7 +128,7 @@ namespace CNCControl
             toolStripButton1.Text = "Connect";
             foreach (string s in SerialPort.GetPortNames())
             {
-                toolStripComboBox1.Items.Add(s);
+                cbPort.Items.Add(s);
             }
             comPort.BaudRate = 250000;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
@@ -133,24 +138,24 @@ namespace CNCControl
         {
             if (isConnect == false)
             {
-                if (toolStripComboBox1.SelectedItem == null)
+                if (cbPort.SelectedItem == null)
                 {
                     MessageBox.Show("Select a port,","No port selected");
                     return;
                 }
-                comPort.PortName = (string)toolStripComboBox1.SelectedItem;
+                comPort.PortName = (string)cbPort.SelectedItem;
                 comPort.Open();
                 toolStripButton1.BackColor = Color.LightGreen;
                 isConnect = true;
                 toolStripButton1.Text = "Disconnect";
                 //timer2.Enabled = true;
-                TimerStatusUpdate.Enabled = true;
+                //TimerStatusUpdate.Enabled = true;
                 lblMode.BackColor = System.Drawing.Color.LightGreen;
                 lblMode.Text = "CONNECTED";
             }
             else 
             {
-                TimerStatusUpdate.Enabled = false;
+                //TimerStatusUpdate.Enabled = false;
                 comPort.Close() ;               
                 toolStripButton1.BackColor = Color.Red;
                 isConnect = false;
@@ -162,7 +167,24 @@ namespace CNCControl
 
         private void button1_Click(object sender, EventArgs e)
         {
-            WriteSerial(txtCommand.Text);
+            if (txtCommand.Text != "")
+            {
+                gCodeCommands = new List<string>();
+                Cursor.Current = Cursors.WaitCursor;
+                txtGCodePreview.Visible = true;
+                Application.DoEvents();
+                pgBar.Value = 0;
+                pgBar.Style = ProgressBarStyle.Marquee;
+                int idx = txtCommand.Lines.Count();
+                int curLine = 0;
+                foreach (string str in txtCommand.Lines)
+                {
+                    gCodeCommands.Add(str);
+                    pgBar.Value = 100 / (idx / ++curLine);
+                    Application.DoEvents();
+                }
+            }
+            Cursor.Current = Cursors.Default;
         }
 
         public void WriteSerial(string cmd)
@@ -175,13 +197,13 @@ namespace CNCControl
 
         private void updateStatus_Tick(object sender, EventArgs e)
         {
-            if (cbUpdate.Checked)
-            {
-                if (comPort.IsOpen)
-                    {
-                        WriteSerial("M114");
-                    }
-            }
+            //////////if (cbUpdate.Checked)
+            //////////{
+            //////////    if (comPort.IsOpen)
+            //////////        {
+            //////////            WriteSerial("M114");
+            //////////        }
+            //////////}
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -208,31 +230,7 @@ namespace CNCControl
         {
             if (cbUpdate.Checked)
             {
-                if (int.Parse(txtInterval.Text) > 0) TimerStatusUpdate.Interval = 1000 * int.Parse(txtInterval.Text); 
-                TimerStatusUpdate.Enabled = true;
-            }
-        }
 
-        private void trackBar1_Scroll(object sender, EventArgs e)
-        {
-            {
-                if (trackBar1.Value < 0)
-                {
-                    TimerStatusUpdate.Interval = 1000 / (-(trackBar1.Value-1));
-                    txtInterval.Text = ((double)(TimerStatusUpdate.Interval)/1000).ToString();
-                    TimerStatusUpdate.Enabled = true;
-                }
-                if (trackBar1.Value == 0)
-                {
-                    txtInterval.Text = "0";
-                    TimerStatusUpdate.Enabled = false;
-                }
-                if (trackBar1.Value > 0)
-                {
-                    TimerStatusUpdate.Interval = trackBar1.Value * 1000;
-                    txtInterval.Text = trackBar1.Value.ToString();
-                    TimerStatusUpdate.Enabled = true;
-                }
             }
         }
 
@@ -295,7 +293,7 @@ namespace CNCControl
 
         private void button8_Click(object sender, EventArgs e)
         {
-            curX += 1;
+            curX += float.Parse(cbStepSize.SelectedItem.ToString(), floatStyles);
             WriteSerial("G0 X" + curX);
         }
 
@@ -307,7 +305,7 @@ namespace CNCControl
 
         private void button4_Click(object sender, EventArgs e)
         {
-            curX -= 1;
+            curX -= float.Parse(cbStepSize.SelectedItem.ToString(),floatStyles);
             WriteSerial("G0 X" + curX);
         }
 
@@ -319,15 +317,21 @@ namespace CNCControl
 
         private void button13_Click(object sender, EventArgs e)
         {
-            gCodeCommands = new List<string>();
-            Cursor.Current = Cursors.WaitCursor;
-            txtGCodePreview.Visible = true;
-            Application.DoEvents();
             if (txtGCodePreview.Text != "")
             {
+                gCodeCommands = new List<string>();
+                Cursor.Current = Cursors.WaitCursor;
+                txtGCodePreview.Visible = true;
+                Application.DoEvents();
+                pgBar.Value = 0;
+                pgBar.Style = ProgressBarStyle.Marquee;
+                int idx = txtGCodePreview.Lines.Count();
+                int curLine = 0;
                 foreach (string str in txtGCodePreview.Lines)
-                {
+                {                    
                     gCodeCommands.Add(str);
+                    pgBar.Value = 100/(idx / ++curLine);
+                    Application.DoEvents();
                 }
             }
             Cursor.Current = Cursors.Default;
@@ -351,9 +355,12 @@ namespace CNCControl
 
         private void button15_Click(object sender, EventArgs e)
         {
+
             WriteSerial("M18");
             bCancel = true;
             bRunning = false;
+            //CommandThread.Suspend();
+            Console.WriteLine("End: " + DateTime.Now);
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -386,6 +393,7 @@ namespace CNCControl
         {
             WriteSerial("M17");
             bCancel = false;
+            Console.WriteLine("Start: " + DateTime.Now);
             CommandThread = new Thread(gCodeThread);
             CommandThread.Start();
         }
@@ -393,19 +401,19 @@ namespace CNCControl
         private void gCodeThread()
         {
             bRunning = true;
-            Console.WriteLine("Start: " + DateTime.Now);
             foreach (string line in gCodeCommands)
             {
                 if (bCancel) break;
                 try
                 {
                     WriteSerial(line);
+                    WaitingACK = true;
                     while(WaitingACK == true) {  // on attend accusé de réception
                 	    Application.DoEvents();
-                        //Thread.Sleep(5);
+                        Thread.Sleep(5);
                     }
-                    if(bCancel == true) break;                
-               	    WaitingACK = true;
+                    if(bCancel == true) break;
+                    Invoke(UpdateComReceiveTextAction, "OK");
                     Invoke(UpdateComReceiveTextAction, line);
                 }
                 catch (Exception e)
@@ -419,12 +427,13 @@ namespace CNCControl
             Console.WriteLine("End: " + DateTime.Now);
         }
 
-        private string gCodeFromBitMap(Bitmap bitmapPicture, double orgX=0.0, double orgY=0.0, int FeedRate=4500, int DPI = 72, int Mode = 1)
+        private string gCodeFromBitMap(Bitmap bitmapPicture, double orgX=0.0, double orgY=0.0, int FeedRate=2500, int DPI = 72, int Mode = 1)
         {
             // open tempFile
             StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
             string strReturn = "";
             string strPixelLevel = "";
+            byte[] pixelLevel = new byte[150];
             int currentPixelColor;
             int previousPixelColor;
             int firstPixel;
@@ -433,43 +442,87 @@ namespace CNCControl
             double currentY = orgY;
             double incX = Math.Round(1 / (DPI / 25.4), 2);  // convert en mm, déterminer taille d'un pixel, arrondi au 1/100 de mm
             double targetX;   // pour le 1er pixel
+            int direction;  // optimize move, éviter un retour de ligne "vide"
             Image8Bit img = new Image8Bit(bitmapPicture);
             var draw = pictureBox1.CreateGraphics();
             var pen = new Pen(Color.LightGreen, 1.0F);
             if (Mode == 1)
             {
+                //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + (orgY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
                 for (int y = 0; y < img.Height; y++)
-                {                    
+                {
+                    direction = y % 2;  // 0 = 0->max, 1 = Max -> 0;
                     strPixelLevel = "";
                     totalPixel = 0;
                     currentY = orgY + ((double)y * incX);
-                    currentX = orgX;
+                    currentX = ( direction == 0 ? orgX : ((double)img.Width * incX) + orgX);
                     draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
-                    int x = 0;
+                    int x = (direction == 0 ? 0 : img.Width - 1);
                     int remainPixel = img.Width;
-                    outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+                    outputFile.WriteLine("G0 Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+                    //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
                     while (remainPixel > 0)
                     {                        
-                        currentPixelColor = img.GetPixel(x++, y).B;
+                        currentPixelColor = img.GetPixel(x, y).B;
+                        x = (direction == 0 ? x+1 : x-1 );
                         totalPixel++;
                         remainPixel--;
                         strPixelLevel += currentPixelColor.ToString("X2");
                         if (totalPixel == Const.MaxPixelPerCommandLine || remainPixel == 0)
                         {
                             // Nouveau segment
-                            outputFile.WriteLine("G5"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " S" + incX.ToString("#0.00")  + " P" + strPixelLevel);
+                            outputFile.WriteLine("A0"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " S" + incX.ToString("#0.00") + " P" + strPixelLevel);
                             totalPixel = 0;
                             strPixelLevel = "";
                         } 
-                        currentX += incX;                       
+                        currentX = (direction == 0 ? currentX + incX : currentX - incX);                       
                     }
                     pictureBox1.Invalidate();
                     Application.DoEvents();
+                    ////outputFile.WriteLine("G0 Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+                    ////outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
                 }
             }
             else if (Mode == 2)
             {
-
+                for (int y = 0; y < img.Height; y++)
+                {
+                    draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
+                    previousPixelColor = firstPixel = img.GetPixel(0, y).B;  // 1er pixel
+                    currentY = orgY + ((double)y * incX);
+                    outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+                    //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
+                    targetX = 0.0 - incX;   // pour le 1er pixel             
+                    //
+                    // TODO : Optimiser le sens d'impression
+                    for (int x = 0; x < img.Width; x++)
+                    {
+                        currentPixelColor = img.GetPixel(x, y).B;
+                        if (currentPixelColor == previousPixelColor)
+                        {
+                            targetX = orgX + ((double)x * incX);
+                        }
+                        else
+                        {
+                            // nouvelle couleur, on clôture le mouvement.
+                            outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + FeedRate.ToString().Trim());
+                            //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
+                            previousPixelColor = currentPixelColor;
+                            firstPixel = -1; // il y a au moins 2 couleur par ligne
+                            targetX = orgX + ((double)x * incX);
+                        }
+                    }
+                    if (firstPixel != -1)
+                    { // on n'a pas détecter d'autre couleur pour la ligne en cours
+                        outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + (FeedRate).ToString().Trim());
+                        //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
+                    }
+                    //currentY = y;  // on considère qu'un pixel est carré
+                    //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + (FeedRate).ToString().Trim());
+                    //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
+                    pictureBox1.Invalidate();
+                    Application.DoEvents();
+                }
             }
             else
             {
@@ -479,53 +532,17 @@ namespace CNCControl
             outputFile.Dispose();
             img.Dispose();
             img = null;
+
             return strReturn;
 
 
 
-            //////////for (int y = 0; y < img.Height; y++)
-            //////////{
-            //////////    draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
-            //////////    previousPixelColor = firstPixel = img.GetPixel(0, y).B;  // 1er pixel
-            //////////    currentY = orgY + ((double)y * incX);
-            //////////    outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-            //////////    //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
-            //////////    targetX = 0.0 - incX;   // pour le 1er pixel             
-            //////////    //
-            //////////    // TODO : Optimiser le sens d'impression
-            //////////    for (int x = 0; x < img.Width; x++)
-            //////////    {
-            //////////        currentPixelColor = img.GetPixel(x, y).B;
-            //////////        if (currentPixelColor == previousPixelColor)
-            //////////        {
-            //////////            targetX = orgX + ((double)x * incX);
-            //////////        }
-            //////////        else
-            //////////        {
-            //////////            // nouvelle couleur, on clôture le mouvement.
-            //////////            outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + FeedRate.ToString().Trim());
-            //////////            //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
-            //////////            previousPixelColor = currentPixelColor;
-            //////////            firstPixel = -1; // il y a au moins 2 couleur par ligne
-            //////////            targetX = orgX + ((double)x * incX);
-            //////////        }
-            //////////    }
-            //////////    if (firstPixel != -1)
-            //////////    { // on n'a pas détecter d'autre couleur pour la ligne en cours
-            //////////        outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + (FeedRate).ToString().Trim());
-            //////////        //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
-            //////////    }
-            //////////    currentY = y;  // on considère qu'un pixel est carré
-            //////////    //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + (FeedRate).ToString().Trim());
-            //////////    //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
-            //////////    pictureBox1.Invalidate();
-            //////////    Application.DoEvents();
-            //////////}
-            outputFile.Close();
-            outputFile.Dispose();
-            img.Dispose();
-            img = null;
-            return strReturn;
+
+            //////////outputFile.Close();
+            //////////outputFile.Dispose();
+            //////////img.Dispose();
+            //////////img = null;
+            //////////return strReturn;
 
             ////////// open tempFile
             ////////StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
@@ -596,8 +613,13 @@ namespace CNCControl
                     {
                         feedRate = int.Parse(txtFeedRate.Text);
                     }
+                    int mode = Const.DefaultMode;
+                    if (cbMode.SelectedIndex == 1)
+                    {
+                        mode = 2;
+                    }                   
                     gCodeFromPicture = new List<string>();
-                    temp = gCodeFromBitMap(imageToPrint,FeedRate:feedRate,DPI:DPI);
+                    temp = gCodeFromBitMap(imageToPrint,FeedRate:feedRate,DPI:DPI,Mode:mode);
                     //foreach (string line in )
                 }
                 catch (Exception ex)
@@ -605,24 +627,25 @@ namespace CNCControl
                     Cursor = Cursors.Default;
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
                 }
-                //try
-                //{
-                //    StreamReader inputFile = new StreamReader(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
-                //    txtGCodePreview.Text = inputFile.ReadToEnd();
-                //    inputFile.Close();
-                //    inputFile.Dispose();
-                //    Cursor.Current = Cursors.Default;
-                //}
-                //catch (Exception exc)
-                //{
 
-                //}
                 Cursor.Current = Cursors.Default;
             }
         }
 
         private void button18_Click(object sender, EventArgs e)
         {
+            try
+            {
+                StreamReader inputFile = new StreamReader(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
+                txtGCodePreview.Text = inputFile.ReadToEnd();
+                inputFile.Close();
+                inputFile.Dispose();
+                Cursor.Current = Cursors.Default;
+            }
+            catch (Exception exc)
+            {
+
+            }
             txtGCodePreview.Visible = true;
         }
 
@@ -653,6 +676,20 @@ namespace CNCControl
             txtImgSizePixelY.Text = imageToPrint.Height.ToString();
             txtImgSizeX.Text = ((double)(imageToPrint.Width / DPI) * 2.54).ToString("0.0#"); //.ToString("0.###");
             txtImgSizeY.Text = ((double)(imageToPrint.Height / DPI) * 2.54).ToString("0.0#"); //.ToString("0.###");
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            cbPort.Items.Clear();
+            foreach (string s in SerialPort.GetPortNames())
+            {
+                cbPort.Items.Add(s);
+            }
+        }
+
+        private void txtResults_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

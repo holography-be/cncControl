@@ -43,26 +43,22 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             this.cbUpdate = new System.Windows.Forms.CheckBox();
-            this.txtInterval = new System.Windows.Forms.TextBox();
-            this.trackBar1 = new System.Windows.Forms.TrackBar();
+            this.label1 = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblTX = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblRX = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblMode = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
+            this.cbPort = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btRefreshPort = new System.Windows.Forms.ToolStripButton();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
-            this.button9 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.button11 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
@@ -72,6 +68,14 @@
             this.txtComReceive = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
+            this.txtFeedRate = new System.Windows.Forms.TextBox();
+            this.cbMode = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.txtImgSizeY = new System.Windows.Forms.TextBox();
+            this.txtImgSizeX = new System.Windows.Forms.TextBox();
+            this.txtImgSizePixelY = new System.Windows.Forms.TextBox();
+            this.txtImgSizePixelX = new System.Windows.Forms.TextBox();
             this.txtGCodePreview = new System.Windows.Forms.TextBox();
             this.cbDPI = new System.Windows.Forms.ComboBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -84,21 +88,13 @@
             this.cbStepSize = new System.Windows.Forms.ComboBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.button20 = new System.Windows.Forms.Button();
-            this.txtImgSizePixelX = new System.Windows.Forms.TextBox();
-            this.txtImgSizePixelY = new System.Windows.Forms.TextBox();
-            this.txtImgSizeX = new System.Windows.Forms.TextBox();
-            this.txtImgSizeY = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.cbMode = new System.Windows.Forms.ComboBox();
-            this.txtFeedRate = new System.Windows.Forms.TextBox();
+            this.pgBar = new System.Windows.Forms.ProgressBar();
             this.displayE = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayZ = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayY = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayX = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.txtLaserTemp = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.label6 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -115,7 +111,7 @@
             // 
             // txtResults
             // 
-            this.txtResults.Location = new System.Drawing.Point(12, 531);
+            this.txtResults.Location = new System.Drawing.Point(12, 646);
             this.txtResults.MaxLength = 0;
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
@@ -123,12 +119,15 @@
             this.txtResults.Size = new System.Drawing.Size(786, 174);
             this.txtResults.TabIndex = 2;
             this.txtResults.WordWrap = false;
+            this.txtResults.TextChanged += new System.EventHandler(this.txtResults_TextChanged);
             // 
             // txtCommand
             // 
             this.txtCommand.Location = new System.Drawing.Point(12, 502);
+            this.txtCommand.Multiline = true;
             this.txtCommand.Name = "txtCommand";
-            this.txtCommand.Size = new System.Drawing.Size(786, 20);
+            this.txtCommand.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtCommand.Size = new System.Drawing.Size(786, 138);
             this.txtCommand.TabIndex = 3;
             // 
             // button1
@@ -153,7 +152,6 @@
             // 
             // TimerStatusUpdate
             // 
-            this.TimerStatusUpdate.Enabled = true;
             this.TimerStatusUpdate.Interval = 3000;
             this.TimerStatusUpdate.Tick += new System.EventHandler(this.updateStatus_Tick);
             // 
@@ -201,12 +199,9 @@
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.displayX);
             this.groupBox1.Controls.Add(this.txtLaserTemp);
-            this.groupBox1.Controls.Add(this.trackBar1);
-            this.groupBox1.Controls.Add(this.txtInterval);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.cbUpdate);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.txtMaxLaserTemp);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -244,6 +239,20 @@
             this.label7.TabIndex = 17;
             this.label7.Text = "Y";
             // 
+            // cbUpdate
+            // 
+            this.cbUpdate.AutoSize = true;
+            this.cbUpdate.Checked = true;
+            this.cbUpdate.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbUpdate.Location = new System.Drawing.Point(51, 347);
+            this.cbUpdate.Name = "cbUpdate";
+            this.cbUpdate.Size = new System.Drawing.Size(94, 17);
+            this.cbUpdate.TabIndex = 29;
+            this.cbUpdate.Text = "Status Update";
+            this.cbUpdate.UseVisualStyleBackColor = true;
+            this.cbUpdate.CheckedChanged += new System.EventHandler(this.cbUpdate_CheckedChanged);
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -252,49 +261,6 @@
             this.label1.Size = new System.Drawing.Size(25, 24);
             this.label1.TabIndex = 16;
             this.label1.Text = "X";
-            // 
-            // label3
-            // 
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(31, 388);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(110, 17);
-            this.label3.TabIndex = 28;
-            this.label3.Text = "Update interval (Sec)";
-            // 
-            // cbUpdate
-            // 
-            this.cbUpdate.AutoSize = true;
-            this.cbUpdate.Checked = true;
-            this.cbUpdate.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbUpdate.Location = new System.Drawing.Point(34, 424);
-            this.cbUpdate.Name = "cbUpdate";
-            this.cbUpdate.Size = new System.Drawing.Size(94, 17);
-            this.cbUpdate.TabIndex = 29;
-            this.cbUpdate.Text = "Status Update";
-            this.cbUpdate.UseVisualStyleBackColor = true;
-            this.cbUpdate.CheckedChanged += new System.EventHandler(this.cbUpdate_CheckedChanged);
-            // 
-            // txtInterval
-            // 
-            this.txtInterval.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtInterval.Location = new System.Drawing.Point(147, 385);
-            this.txtInterval.Name = "txtInterval";
-            this.txtInterval.Size = new System.Drawing.Size(61, 20);
-            this.txtInterval.TabIndex = 30;
-            this.txtInterval.Text = "3";
-            // 
-            // trackBar1
-            // 
-            this.trackBar1.Location = new System.Drawing.Point(49, 334);
-            this.trackBar1.Maximum = 5;
-            this.trackBar1.Minimum = -5;
-            this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(155, 45);
-            this.trackBar1.TabIndex = 31;
-            this.trackBar1.Value = 3;
-            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
             // 
             // statusStrip1
             // 
@@ -352,10 +318,10 @@
             this.toolStripDropDownButton1.Size = new System.Drawing.Size(164, 33);
             this.toolStripDropDownButton1.Text = "toolStripDropDownButton1";
             // 
-            // toolStripComboBox1
+            // cbPort
             // 
-            this.toolStripComboBox1.Name = "toolStripComboBox1";
-            this.toolStripComboBox1.Size = new System.Drawing.Size(121, 25);
+            this.cbPort.Name = "cbPort";
+            this.cbPort.Size = new System.Drawing.Size(121, 25);
             // 
             // toolStripButton1
             // 
@@ -380,7 +346,8 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripComboBox1,
+            this.cbPort,
+            this.btRefreshPort,
             this.toolStripButton1,
             this.toolStripButton2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
@@ -389,15 +356,16 @@
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // button3
+            // btRefreshPort
             // 
-            this.button3.Location = new System.Drawing.Point(6, 100);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 112);
-            this.button3.TabIndex = 35;
-            this.button3.Text = "button3";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.btRefreshPort.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btRefreshPort.Image = ((System.Drawing.Image)(resources.GetObject("btRefreshPort.Image")));
+            this.btRefreshPort.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btRefreshPort.Name = "btRefreshPort";
+            this.btRefreshPort.Size = new System.Drawing.Size(50, 22);
+            this.btRefreshPort.Text = "Refresh";
+            this.btRefreshPort.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.btRefreshPort.Click += new System.EventHandler(this.toolStripButton3_Click);
             // 
             // button4
             // 
@@ -438,16 +406,6 @@
             this.button8.Text = "button8";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
-            // 
-            // button9
-            // 
-            this.button9.Location = new System.Drawing.Point(396, 100);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(75, 112);
-            this.button9.TabIndex = 40;
-            this.button9.Text = "button9";
-            this.button9.UseVisualStyleBackColor = true;
-            this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // button10
             // 
@@ -554,6 +512,72 @@
             this.tabPage2.Text = "Image to print";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(359, 232);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(49, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Feedrate";
+            // 
+            // txtFeedRate
+            // 
+            this.txtFeedRate.Location = new System.Drawing.Point(359, 251);
+            this.txtFeedRate.Name = "txtFeedRate";
+            this.txtFeedRate.Size = new System.Drawing.Size(123, 20);
+            this.txtFeedRate.TabIndex = 13;
+            this.txtFeedRate.Text = "2500";
+            // 
+            // cbMode
+            // 
+            this.cbMode.FormattingEnabled = true;
+            this.cbMode.Items.AddRange(new object[] {
+            "Mode 1",
+            "Mode 2"});
+            this.cbMode.Location = new System.Drawing.Point(358, 208);
+            this.cbMode.Name = "cbMode";
+            this.cbMode.Size = new System.Drawing.Size(124, 21);
+            this.cbMode.TabIndex = 12;
+            this.cbMode.Text = "Mode 1";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(457, 38);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(25, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "DPI";
+            // 
+            // txtImgSizeY
+            // 
+            this.txtImgSizeY.Location = new System.Drawing.Point(423, 89);
+            this.txtImgSizeY.Name = "txtImgSizeY";
+            this.txtImgSizeY.Size = new System.Drawing.Size(59, 20);
+            this.txtImgSizeY.TabIndex = 10;
+            // 
+            // txtImgSizeX
+            // 
+            this.txtImgSizeX.Location = new System.Drawing.Point(358, 89);
+            this.txtImgSizeX.Name = "txtImgSizeX";
+            this.txtImgSizeX.Size = new System.Drawing.Size(59, 20);
+            this.txtImgSizeX.TabIndex = 9;
+            // 
+            // txtImgSizePixelY
+            // 
+            this.txtImgSizePixelY.Location = new System.Drawing.Point(423, 62);
+            this.txtImgSizePixelY.Name = "txtImgSizePixelY";
+            this.txtImgSizePixelY.Size = new System.Drawing.Size(59, 20);
+            this.txtImgSizePixelY.TabIndex = 8;
+            // 
+            // txtImgSizePixelX
+            // 
+            this.txtImgSizePixelX.Location = new System.Drawing.Point(358, 62);
+            this.txtImgSizePixelX.Name = "txtImgSizePixelX";
+            this.txtImgSizePixelX.Size = new System.Drawing.Size(59, 20);
+            this.txtImgSizePixelX.TabIndex = 7;
+            // 
             // txtGCodePreview
             // 
             this.txtGCodePreview.Location = new System.Drawing.Point(592, 6);
@@ -633,13 +657,11 @@
             // 
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.cbStepSize);
-            this.tabPage1.Controls.Add(this.button3);
             this.tabPage1.Controls.Add(this.button4);
             this.tabPage1.Controls.Add(this.button5);
             this.tabPage1.Controls.Add(this.button7);
             this.tabPage1.Controls.Add(this.button8);
             this.tabPage1.Controls.Add(this.button12);
-            this.tabPage1.Controls.Add(this.button9);
             this.tabPage1.Controls.Add(this.button11);
             this.tabPage1.Controls.Add(this.button10);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -686,62 +708,15 @@
             this.button20.UseVisualStyleBackColor = true;
             this.button20.Click += new System.EventHandler(this.button20_Click);
             // 
-            // txtImgSizePixelX
+            // pgBar
             // 
-            this.txtImgSizePixelX.Location = new System.Drawing.Point(358, 62);
-            this.txtImgSizePixelX.Name = "txtImgSizePixelX";
-            this.txtImgSizePixelX.Size = new System.Drawing.Size(59, 20);
-            this.txtImgSizePixelX.TabIndex = 7;
-            // 
-            // txtImgSizePixelY
-            // 
-            this.txtImgSizePixelY.Location = new System.Drawing.Point(423, 62);
-            this.txtImgSizePixelY.Name = "txtImgSizePixelY";
-            this.txtImgSizePixelY.Size = new System.Drawing.Size(59, 20);
-            this.txtImgSizePixelY.TabIndex = 8;
-            // 
-            // txtImgSizeX
-            // 
-            this.txtImgSizeX.Location = new System.Drawing.Point(358, 89);
-            this.txtImgSizeX.Name = "txtImgSizeX";
-            this.txtImgSizeX.Size = new System.Drawing.Size(59, 20);
-            this.txtImgSizeX.TabIndex = 9;
-            // 
-            // txtImgSizeY
-            // 
-            this.txtImgSizeY.Location = new System.Drawing.Point(423, 89);
-            this.txtImgSizeY.Name = "txtImgSizeY";
-            this.txtImgSizeY.Size = new System.Drawing.Size(59, 20);
-            this.txtImgSizeY.TabIndex = 10;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(457, 38);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(25, 13);
-            this.label5.TabIndex = 11;
-            this.label5.Text = "DPI";
-            // 
-            // cbMode
-            // 
-            this.cbMode.FormattingEnabled = true;
-            this.cbMode.Items.AddRange(new object[] {
-            "Mode 1",
-            "Mode 2"});
-            this.cbMode.Location = new System.Drawing.Point(358, 208);
-            this.cbMode.Name = "cbMode";
-            this.cbMode.Size = new System.Drawing.Size(124, 21);
-            this.cbMode.TabIndex = 12;
-            this.cbMode.Text = "Mode 1";
-            // 
-            // txtFeedRate
-            // 
-            this.txtFeedRate.Location = new System.Drawing.Point(359, 251);
-            this.txtFeedRate.Name = "txtFeedRate";
-            this.txtFeedRate.Size = new System.Drawing.Size(123, 20);
-            this.txtFeedRate.TabIndex = 13;
-            this.txtFeedRate.Text = "4500";
+            this.pgBar.BackColor = System.Drawing.SystemColors.Control;
+            this.pgBar.ForeColor = System.Drawing.Color.Red;
+            this.pgBar.Location = new System.Drawing.Point(804, 826);
+            this.pgBar.Name = "pgBar";
+            this.pgBar.Size = new System.Drawing.Size(366, 23);
+            this.pgBar.Step = 1;
+            this.pgBar.TabIndex = 50;
             // 
             // displayE
             // 
@@ -828,21 +803,13 @@
             this.txtLaserTemp.TabStop = false;
             this.txtLaserTemp.Value = "";
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(359, 232);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(49, 13);
-            this.label6.TabIndex = 14;
-            this.label6.Text = "Feedrate";
-            // 
             // frmCNCMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(1184, 861);
+            this.Controls.Add(this.pgBar);
             this.Controls.Add(this.button20);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.txtComReceive);
@@ -864,7 +831,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -897,15 +863,12 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label1;
         private DmitryBrant.CustomControls.SevenSegmentArray displayX;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox cbUpdate;
-        private System.Windows.Forms.TextBox txtInterval;
-        private System.Windows.Forms.TrackBar trackBar1;
         private DmitryBrant.CustomControls.SevenSegmentArray displayE;
         private DmitryBrant.CustomControls.SevenSegmentArray displayZ;
         private DmitryBrant.CustomControls.SevenSegmentArray displayY;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripComboBox toolStripComboBox1;
+        private System.Windows.Forms.ToolStripComboBox cbPort;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.ToolStrip toolStrip1;
@@ -914,12 +877,10 @@
         private System.Windows.Forms.ToolStripStatusLabel lblMode;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private DmitryBrant.CustomControls.SevenSegmentArray txtLaserTemp;
-        private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Button button8;
-        private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Button button12;
@@ -949,6 +910,8 @@
         private System.Windows.Forms.ComboBox cbMode;
         private System.Windows.Forms.TextBox txtFeedRate;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ProgressBar pgBar;
+        private System.Windows.Forms.ToolStripButton btRefreshPort;
     }
 }
 

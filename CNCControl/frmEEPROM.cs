@@ -292,6 +292,7 @@ namespace CNCControl
         {
             // Read values in EEPROM
             strConfig.Clear();
+            frmParent.CurrentMode = eMode.READEEPROM;
             frmParent.WriteSerial("M501");
         }
 
