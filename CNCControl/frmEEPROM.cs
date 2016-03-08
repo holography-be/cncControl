@@ -147,24 +147,24 @@ namespace CNCControl
             {
                 string strCommand = "";
                 strCommand = "M92 X" + txt_X_92.Text + " Y" + txt_Y_92.Text + " Z" + txt_Z_92.Text + " E" + txt_E_92.Text ;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 strCommand = "M203 X" + txt_X_203.Text + " Y" + txt_Y_203.Text + " Z" + txt_Z_203.Text + " E" + txt_E_203.Text;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 strCommand = "M201 X" + txt_X_201.Text + " Y" + txt_Y_201.Text + " Z" + txt_Z_201.Text + " E" + txt_E_201.Text;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 strCommand = "M204 S" + txt_S_204.Text;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 strCommand = "M205 X" + txt_X_205.Text + " Z" + txt_Z_205.Text + " E" + txt_E_205.Text + " S" + txt_S_205.Text + " T" + txt_T_205.Text + " B" + txt_B_205.Text;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 strCommand = "M206 X" + txt_X_206.Text + " Y" + txt_Y_206.Text + " Z" + txt_Z_206.Text;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 strCommand = "M210 L" + txt_MIN_210.Text + " O" + txt_OPERATION_210.Text + " H" + txt_MAX_210.Text;
-                frmParent.WriteSerial(strCommand);
+                frmParent.SerialWriteLine(strCommand);
                 // Save in EEPROM
-                frmParent.WriteSerial("M500");
+                frmParent.SerialWriteLine("M500");
                 //System.Threading.Thread.Sleep(250);
                 // reload values from EEPROM
-                frmParent.WriteSerial("M501");
+                frmParent.SerialWriteLine("M501");
                 button1_Click(sender, e);
             }
         }
@@ -173,14 +173,14 @@ namespace CNCControl
         {
             strConfig.Clear();
             frmParent.CurrentMode = eMode.READEEPROM;
-            frmParent.WriteSerial("M503");
+            frmParent.SerialWriteLine("M503");
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure to restore default values ?", "Confirmation", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
             {
-                frmParent.WriteSerial("M502");
+                frmParent.SerialWriteLine("M502");
                 button1_Click(sender, e);
             }
         }
@@ -293,7 +293,7 @@ namespace CNCControl
             // Read values in EEPROM
             strConfig.Clear();
             frmParent.CurrentMode = eMode.READEEPROM;
-            frmParent.WriteSerial("M501");
+            frmParent.SerialWriteLine("M501");
         }
 
 

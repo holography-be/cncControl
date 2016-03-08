@@ -130,7 +130,7 @@ namespace CNCControl
             {
                 cbPort.Items.Add(s);
             }
-            comPort.BaudRate = 250000;
+            comPort.BaudRate = 115200;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
         }
 
@@ -187,7 +187,15 @@ namespace CNCControl
             Cursor.Current = Cursors.Default;
         }
 
-        public void WriteSerial(string cmd)
+        public void SerialWrite(string cmd)
+        {
+            if (comPort.IsOpen)
+            {
+                comPort.Write(cmd.ToUpper());
+            }
+        }
+
+        public void SerialWriteLine(string cmd)
         {
             if(comPort.IsOpen) 
             {
@@ -208,7 +216,7 @@ namespace CNCControl
 
         private void button2_Click(object sender, EventArgs e)
         {
-            WriteSerial("M121");
+            SerialWriteLine("M121");
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -287,49 +295,78 @@ namespace CNCControl
         #region Joggle Control
         private void button12_Click(object sender, EventArgs e)
         {
-            WriteSerial("G92 X0 Y0 Z0");
+            SerialWriteLine("G92 X0 Y0 Z0");
             curX = curY = curZ = 0;
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
             curX += float.Parse(cbStepSize.SelectedItem.ToString(), floatStyles);
-            WriteSerial("G0 X" + curX);
+            SerialWriteLine("G0 X" + curX);
         }
 
         private void button9_Click(object sender, EventArgs e)
         {
             curX += 10;
-            WriteSerial("G0 X" + curX);
+            SerialWriteLine("G0 X" + curX);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             curX -= float.Parse(cbStepSize.SelectedItem.ToString(),floatStyles);
-            WriteSerial("G0 X" + curX);
+            SerialWriteLine("G0 X" + curX);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             curX -= 10;
-            WriteSerial("G0 X" + curX);
+            SerialWriteLine("G0 X" + curX);
         }
 
         private void button13_Click(object sender, EventArgs e)
         {
             if (txtGCodePreview.Text != "")
             {
+                SerialWriteLine("M18");
+                bCancel = true;
+                bRunning = false;
+                string strTemp = "";
+                char high;
+                char low;
+                var val = 0 ;
+                int x;
                 gCodeCommands = new List<string>();
                 Cursor.Current = Cursors.WaitCursor;
                 txtGCodePreview.Visible = true;
                 Application.DoEvents();
+                pgBar.Maximum = 100;
                 pgBar.Value = 0;
+                pgBar.ForeColor = Color.Blue;
                 pgBar.Style = ProgressBarStyle.Marquee;
                 int idx = txtGCodePreview.Lines.Count();
+                //pgBar.Maximum = idx;
                 int curLine = 0;
                 foreach (string str in txtGCodePreview.Lines)
                 {                    
-                    gCodeCommands.Add(str);
+                    x = str.IndexOf("P") + 1;
+                    if (str.StartsWith("A"))
+                    {
+                        strTemp = str.Substring(0, x);
+                        // convert Hexa to Binary
+                        while (x < str.Length)
+                        {
+                            high = str.ElementAt(x++);
+                            low = str.ElementAt(x++);
+                            val = ((high > '9' ? high - 55 : high - 48) << 4) + (low > '9' ? low - 55 : low - 48);
+                            strTemp += (char)val;
+                        }
+                        val = x;
+                        // trail
+                        strTemp += new string('\0',Const.MaxPixelPerCommandLine);
+                        strTemp = strTemp.Substring(0, 197);
+                    }
+                    else strTemp = str;                 
+                    gCodeCommands.Add(strTemp);
                     pgBar.Value = 100/(idx / ++curLine);
                     Application.DoEvents();
                 }
@@ -355,8 +392,7 @@ namespace CNCControl
 
         private void button15_Click(object sender, EventArgs e)
         {
-
-            WriteSerial("M18");
+            SerialWriteLine("M18");
             bCancel = true;
             bRunning = false;
             //CommandThread.Suspend();
@@ -366,32 +402,32 @@ namespace CNCControl
         private void button5_Click(object sender, EventArgs e)
         {
             curY -= 1;
-            WriteSerial("G0 Y" + curY);
+            SerialWriteLine("G0 Y" + curY);
         }
 
         private void button10_Click(object sender, EventArgs e)
         {
             curY -= 10;
-            WriteSerial("G0 Y" + curY);
+            SerialWriteLine("G0 Y" + curY);
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
             curY += 1;
-            WriteSerial("G0 Y" + curY);
+            SerialWriteLine("G0 Y" + curY);
         }
 
         private void button11_Click(object sender, EventArgs e)
         {
             curY += 10;
-            WriteSerial("G0 Y" + curY);
+            SerialWriteLine("G0 Y" + curY);
         } 
         #endregion
 
 
         private void button14_Click(object sender, EventArgs e)
         {
-            WriteSerial("M17");
+            //WriteSerial("M17");
             bCancel = false;
             Console.WriteLine("Start: " + DateTime.Now);
             CommandThread = new Thread(gCodeThread);
@@ -406,7 +442,15 @@ namespace CNCControl
                 if (bCancel) break;
                 try
                 {
-                    WriteSerial(line);
+                    // si pixelSegment, on évite les CR/LF
+                    if (line.StartsWith("A"))
+                    {
+                        SerialWrite(line);
+                    }
+                    else
+                    {
+                        SerialWriteLine(line);
+                    }
                     WaitingACK = true;
                     while(WaitingACK == true) {  // on attend accusé de réception
                 	    Application.DoEvents();
@@ -429,111 +473,192 @@ namespace CNCControl
 
         private string gCodeFromBitMap(Bitmap bitmapPicture, double orgX=0.0, double orgY=0.0, int FeedRate=2500, int DPI = 72, int Mode = 1)
         {
-            // open tempFile
+            string str = "";
+            int x;
+            int y;
+            int remainPixel;
+            double realX;
+            double realY;
+            double pixSize = 1 / (DPI / 25.4);
+            int direction;
+            int stepX;
+            Image8Bit image = new Image8Bit(bitmapPicture);
+            int pixelSize = (int)(Math.Round(1 / (DPI / 25.4), 2) * 100);
+            byte[][] pixelTable;
+            realY = orgY;
+            realX = orgX;
+            pixelTable = new byte[image.Height][];
+            pgBar.Minimum = 0;
+            pgBar.Maximum = image.Height * image.Width;
+            pgBar.ForeColor = Color.Red;
+            for (y = 0; y < image.Height; y++)
+            {
+                pixelTable[y] = new byte[image.Width];
+                for (x = 0; x < image.Width; x++)
+                {
+                    pixelTable[y][x] = (image.GetPixel(x, y).B);
+                }
+                pgBar.Value = (y + 1) * x;
+                Application.DoEvents();
+            }
+            image.Dispose();
+            Application.DoEvents();
+            pgBar.Value = 0;
+            pgBar.Maximum = pixelTable.Length;
+            pgBar.ForeColor = Color.Green;
+            str = "";
+            realY = orgY;
+            realX = orgX;
             StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
-            string strReturn = "";
-            string strPixelLevel = "";
-            byte[] pixelLevel = new byte[150];
-            int currentPixelColor;
-            int previousPixelColor;
-            int firstPixel;
-            int totalPixel;
-            double currentX = 0.0;
-            double currentY = orgY;
-            double incX = Math.Round(1 / (DPI / 25.4), 2);  // convert en mm, déterminer taille d'un pixel, arrondi au 1/100 de mm
-            double targetX;   // pour le 1er pixel
-            int direction;  // optimize move, éviter un retour de ligne "vide"
-            Image8Bit img = new Image8Bit(bitmapPicture);
-            var draw = pictureBox1.CreateGraphics();
-            var pen = new Pen(Color.LightGreen, 1.0F);
-            if (Mode == 1)
+            for (y = 0; y < (pixelTable.Length); y++)
             {
-                //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + (orgY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-                for (int y = 0; y < img.Height; y++)
+                direction = ((y % 2) == 0 ? 1 : -1);
+                realX = (direction == -1 ? realX : orgX);
+                outputFile.WriteLine("G0 Y" + realY.ToString("##0.00") + " X" + realX.ToString("##0.00") + " F" + FeedRate.ToString().Trim());
+                remainPixel = pixelTable[y].Length;
+                x = 0;
+                str = "";
+                stepX = 0;
+                while (remainPixel > 0)
                 {
-                    direction = y % 2;  // 0 = 0->max, 1 = Max -> 0;
-                    strPixelLevel = "";
-                    totalPixel = 0;
-                    currentY = orgY + ((double)y * incX);
-                    currentX = ( direction == 0 ? orgX : ((double)img.Width * incX) + orgX);
-                    draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
-                    int x = (direction == 0 ? 0 : img.Width - 1);
-                    int remainPixel = img.Width;
-                    outputFile.WriteLine("G0 Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-                    //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-                    while (remainPixel > 0)
-                    {                        
-                        currentPixelColor = img.GetPixel(x, y).B;
-                        x = (direction == 0 ? x+1 : x-1 );
-                        totalPixel++;
-                        remainPixel--;
-                        strPixelLevel += currentPixelColor.ToString("X2");
-                        if (totalPixel == Const.MaxPixelPerCommandLine || remainPixel == 0)
-                        {
-                            // Nouveau segment
-                            outputFile.WriteLine("A0"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " S" + incX.ToString("#0.00") + " P" + strPixelLevel);
-                            totalPixel = 0;
-                            strPixelLevel = "";
-                        } 
-                        currentX = (direction == 0 ? currentX + incX : currentX - incX);                       
-                    }
-                    pictureBox1.Invalidate();
-                    Application.DoEvents();
-                    ////outputFile.WriteLine("G0 Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-                    ////outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-                }
-            }
-            else if (Mode == 2)
-            {
-                for (int y = 0; y < img.Height; y++)
-                {
-                    draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
-                    previousPixelColor = firstPixel = img.GetPixel(0, y).B;  // 1er pixel
-                    currentY = orgY + ((double)y * incX);
-                    outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
-                    //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
-                    targetX = 0.0 - incX;   // pour le 1er pixel             
-                    //
-                    // TODO : Optimiser le sens d'impression
-                    for (int x = 0; x < img.Width; x++)
+                    str += pixelTable[y][(direction == 1 ? x : (pixelTable[y].Length - 1) - x)].ToString("X2");
+                    stepX++;
+                    x++;
+                    realX += pixSize * direction;
+                    if (stepX == Const.MaxPixelPerCommandLine)
                     {
-                        currentPixelColor = img.GetPixel(x, y).B;
-                        if (currentPixelColor == previousPixelColor)
-                        {
-                            targetX = orgX + ((double)x * incX);
-                        }
-                        else
-                        {
-                            // nouvelle couleur, on clôture le mouvement.
-                            outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + FeedRate.ToString().Trim());
-                            //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
-                            previousPixelColor = currentPixelColor;
-                            firstPixel = -1; // il y a au moins 2 couleur par ligne
-                            targetX = orgX + ((double)x * incX);
-                        }
+                        outputFile.WriteLine("A X" + realX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " P" + str);
+                        stepX = 0;
+                        str = "";
                     }
-                    if (firstPixel != -1)
-                    { // on n'a pas détecter d'autre couleur pour la ligne en cours
-                        outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + (FeedRate).ToString().Trim());
-                        //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
-                    }
-                    //currentY = y;  // on considère qu'un pixel est carré
-                    //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + (FeedRate).ToString().Trim());
-                    //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
-                    pictureBox1.Invalidate();
-                    Application.DoEvents();
+                    remainPixel--;
                 }
+                if (str != "")
+                {
+                    outputFile.WriteLine("A X" + realX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " P" + str);
+                }
+                pgBar.Value = y + 1;
+                Application.DoEvents();
+                realY += ((double)pixelSize) / 100;
             }
-            else
-            {
-                // unknown Mode
-            }
+            Application.DoEvents();
             outputFile.Close();
             outputFile.Dispose();
-            img.Dispose();
-            img = null;
+            Cursor.Current = Cursors.Default;
 
-            return strReturn;
+
+
+
+
+
+
+
+
+            //////////// open tempFile
+            //////////StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
+            //////////string strReturn = "";
+            //////////string strPixelLevel = "";
+            //////////byte[] pixelLevel = new byte[150];
+            //////////int currentPixelColor;
+            //////////int previousPixelColor;
+            //////////int firstPixel;
+            //////////int totalPixel;
+            //////////double currentX = 0.0;
+            //////////double currentY = orgY;
+            //////////double incX = Math.Round(1 / (DPI / 25.4), 2);  // convert en mm, déterminer taille d'un pixel, arrondi au 1/100 de mm
+            //////////double targetX;   // pour le 1er pixel
+            //////////int direction;  // optimize move, éviter un retour de ligne "vide"
+            //////////Image8Bit img = new Image8Bit(bitmapPicture);
+            //////////var draw = pictureBox1.CreateGraphics();
+            //////////var pen = new Pen(Color.LightGreen, 1.0F);
+            //////////if (Mode == 1)
+            //////////{
+            //////////    //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + (orgY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+            //////////    for (int y = 0; y < img.Height; y++)
+            //////////    {
+            //////////        direction = y % 2;  // 0 = 0->max, 1 = Max -> 0;
+            //////////        strPixelLevel = "";
+            //////////        totalPixel = 0;
+            //////////        currentY = orgY + ((double)y * incX);
+            //////////        currentX = ( direction == 0 ? orgX : ((double)img.Width * incX) + orgX);
+            //////////        draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
+            //////////        int x = (direction == 0 ? 0 : img.Width - 1);
+            //////////        int remainPixel = img.Width;
+            //////////        outputFile.WriteLine("G0 Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+            //////////        //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+            //////////        while (remainPixel > 0)
+            //////////        {                        
+            //////////            currentPixelColor = img.GetPixel(x, y).B;
+            //////////            x = (direction == 0 ? x+1 : x-1 );
+            //////////            totalPixel++;
+            //////////            remainPixel--;
+            //////////            strPixelLevel += currentPixelColor.ToString("X2");
+            //////////            if (totalPixel == Const.MaxPixelPerCommandLine || remainPixel == 0)
+            //////////            {
+            //////////                // Nouveau segment
+            //////////                outputFile.WriteLine("A0"  + " X" + (currentX).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " S" + incX.ToString("#0.00") + " P" + strPixelLevel);
+            //////////                totalPixel = 0;
+            //////////                strPixelLevel = "";
+            //////////            } 
+            //////////            currentX = (direction == 0 ? currentX + incX : currentX - incX);                       
+            //////////        }
+            //////////        pictureBox1.Invalidate();
+            //////////        Application.DoEvents();
+            //////////        ////outputFile.WriteLine("G0 Y" + (currentY).ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+            //////////        ////outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+            //////////    }
+            //////////}
+            //////////else if (Mode == 2)
+            //////////{
+            //////////    for (int y = 0; y < img.Height; y++)
+            //////////    {
+            //////////        draw.DrawLine(pen, 0, y, pictureBox1.Width, y);
+            //////////        previousPixelColor = firstPixel = img.GetPixel(0, y).B;  // 1er pixel
+            //////////        currentY = orgY + ((double)y * incX);
+            //////////        outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim());
+            //////////        //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
+            //////////        targetX = 0.0 - incX;   // pour le 1er pixel             
+            //////////        //
+            //////////        // TODO : Optimiser le sens d'impression
+            //////////        for (int x = 0; x < img.Width; x++)
+            //////////        {
+            //////////            currentPixelColor = img.GetPixel(x, y).B;
+            //////////            if (currentPixelColor == previousPixelColor)
+            //////////            {
+            //////////                targetX = orgX + ((double)x * incX);
+            //////////            }
+            //////////            else
+            //////////            {
+            //////////                // nouvelle couleur, on clôture le mouvement.
+            //////////                outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + FeedRate.ToString().Trim());
+            //////////                //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
+            //////////                previousPixelColor = currentPixelColor;
+            //////////                firstPixel = -1; // il y a au moins 2 couleur par ligne
+            //////////                targetX = orgX + ((double)x * incX);
+            //////////            }
+            //////////        }
+            //////////        if (firstPixel != -1)
+            //////////        { // on n'a pas détecter d'autre couleur pour la ligne en cours
+            //////////            outputFile.WriteLine("G1 X" + targetX.ToString("##0.00").Trim() + " L" + previousPixelColor.ToString().Trim() + " F" + (FeedRate).ToString().Trim());
+            //////////            //strReturn += "G1 X" + targetX.ToString("###.##").Trim() + " L" + previousPixelColor.ToString().Trim() + (" F" + FeedRate).Trim();
+            //////////        }
+            //////////        //currentY = y;  // on considère qu'un pixel est carré
+            //////////        //outputFile.WriteLine("G0 X" + orgX.ToString("##0.00").Trim() + " Y" + currentY.ToString("##0.00").Trim() + " F" + (FeedRate).ToString().Trim());
+            //////////        //strReturn += "G0 X" + orgX.ToString("###.##").Trim() + " Y" + currentY.ToString("###.##").Trim() + (" F" + FeedRate).Trim();
+            //////////        pictureBox1.Invalidate();
+            //////////        Application.DoEvents();
+            //////////    }
+            //////////}
+            //////////else
+            //////////{
+            //////////    // unknown Mode
+            //////////}
+            //////////outputFile.Close();
+            //////////outputFile.Dispose();
+            //////////img.Dispose();
+            //////////img = null;
+
+            return "";
 
 
 

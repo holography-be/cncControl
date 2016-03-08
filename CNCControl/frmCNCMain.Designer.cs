@@ -40,8 +40,13 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.displayE = new DmitryBrant.CustomControls.SevenSegmentArray();
+            this.displayZ = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.label9 = new System.Windows.Forms.Label();
+            this.displayY = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.label8 = new System.Windows.Forms.Label();
+            this.displayX = new DmitryBrant.CustomControls.SevenSegmentArray();
+            this.txtLaserTemp = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.label7 = new System.Windows.Forms.Label();
             this.cbUpdate = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -89,11 +94,6 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.button20 = new System.Windows.Forms.Button();
             this.pgBar = new System.Windows.Forms.ProgressBar();
-            this.displayE = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.displayZ = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.displayY = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.displayX = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.txtLaserTemp = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.groupBox1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -105,7 +105,7 @@
             // 
             // comPort
             // 
-            this.comPort.BaudRate = 250000;
+            this.comPort.BaudRate = 115200;
             this.comPort.DiscardNull = true;
             this.comPort.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.comPort_DataReceived);
             // 
@@ -132,7 +132,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(804, 500);
+            this.button1.Location = new System.Drawing.Point(804, 499);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(71, 23);
             this.button1.TabIndex = 4;
@@ -180,7 +180,7 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(881, 500);
+            this.button6.Location = new System.Drawing.Point(881, 499);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(75, 23);
             this.button6.TabIndex = 23;
@@ -212,6 +212,40 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Position";
             // 
+            // displayE
+            // 
+            this.displayE.ArrayCount = 6;
+            this.displayE.ColorBackground = System.Drawing.Color.Black;
+            this.displayE.ColorDark = System.Drawing.Color.Green;
+            this.displayE.ColorLight = System.Drawing.Color.Lime;
+            this.displayE.DecimalShow = true;
+            this.displayE.ElementPadding = new System.Windows.Forms.Padding(4);
+            this.displayE.ElementWidth = 10;
+            this.displayE.ItalicFactor = 0F;
+            this.displayE.Location = new System.Drawing.Point(49, 157);
+            this.displayE.Name = "displayE";
+            this.displayE.Size = new System.Drawing.Size(156, 36);
+            this.displayE.TabIndex = 3;
+            this.displayE.TabStop = false;
+            this.displayE.Value = "0000.00";
+            // 
+            // displayZ
+            // 
+            this.displayZ.ArrayCount = 6;
+            this.displayZ.ColorBackground = System.Drawing.Color.Black;
+            this.displayZ.ColorDark = System.Drawing.Color.Green;
+            this.displayZ.ColorLight = System.Drawing.Color.Lime;
+            this.displayZ.DecimalShow = true;
+            this.displayZ.ElementPadding = new System.Windows.Forms.Padding(4);
+            this.displayZ.ElementWidth = 10;
+            this.displayZ.ItalicFactor = 0F;
+            this.displayZ.Location = new System.Drawing.Point(49, 114);
+            this.displayZ.Name = "displayZ";
+            this.displayZ.Size = new System.Drawing.Size(156, 36);
+            this.displayZ.TabIndex = 2;
+            this.displayZ.TabStop = false;
+            this.displayZ.Value = "0000.00";
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -221,6 +255,23 @@
             this.label9.TabIndex = 19;
             this.label9.Text = "E";
             // 
+            // displayY
+            // 
+            this.displayY.ArrayCount = 6;
+            this.displayY.ColorBackground = System.Drawing.Color.Black;
+            this.displayY.ColorDark = System.Drawing.Color.Green;
+            this.displayY.ColorLight = System.Drawing.Color.Lime;
+            this.displayY.DecimalShow = true;
+            this.displayY.ElementPadding = new System.Windows.Forms.Padding(4);
+            this.displayY.ElementWidth = 10;
+            this.displayY.ItalicFactor = 0F;
+            this.displayY.Location = new System.Drawing.Point(49, 71);
+            this.displayY.Name = "displayY";
+            this.displayY.Size = new System.Drawing.Size(156, 36);
+            this.displayY.TabIndex = 1;
+            this.displayY.TabStop = false;
+            this.displayY.Value = "0000.00";
+            // 
             // label8
             // 
             this.label8.AutoSize = true;
@@ -229,6 +280,40 @@
             this.label8.Size = new System.Drawing.Size(23, 24);
             this.label8.TabIndex = 18;
             this.label8.Text = "Z";
+            // 
+            // displayX
+            // 
+            this.displayX.ArrayCount = 6;
+            this.displayX.ColorBackground = System.Drawing.Color.Black;
+            this.displayX.ColorDark = System.Drawing.Color.Green;
+            this.displayX.ColorLight = System.Drawing.Color.Lime;
+            this.displayX.DecimalShow = true;
+            this.displayX.ElementPadding = new System.Windows.Forms.Padding(4);
+            this.displayX.ElementWidth = 10;
+            this.displayX.ItalicFactor = 0F;
+            this.displayX.Location = new System.Drawing.Point(49, 28);
+            this.displayX.Name = "displayX";
+            this.displayX.Size = new System.Drawing.Size(156, 36);
+            this.displayX.TabIndex = 0;
+            this.displayX.TabStop = false;
+            this.displayX.Value = "0000.00";
+            // 
+            // txtLaserTemp
+            // 
+            this.txtLaserTemp.ArrayCount = 4;
+            this.txtLaserTemp.ColorBackground = System.Drawing.Color.Black;
+            this.txtLaserTemp.ColorDark = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.txtLaserTemp.ColorLight = System.Drawing.Color.Red;
+            this.txtLaserTemp.DecimalShow = true;
+            this.txtLaserTemp.ElementPadding = new System.Windows.Forms.Padding(4);
+            this.txtLaserTemp.ElementWidth = 10;
+            this.txtLaserTemp.ItalicFactor = 0F;
+            this.txtLaserTemp.Location = new System.Drawing.Point(51, 228);
+            this.txtLaserTemp.Name = "txtLaserTemp";
+            this.txtLaserTemp.Size = new System.Drawing.Size(153, 50);
+            this.txtLaserTemp.TabIndex = 34;
+            this.txtLaserTemp.TabStop = false;
+            this.txtLaserTemp.Value = "";
             // 
             // label7
             // 
@@ -717,91 +802,6 @@
             this.pgBar.Size = new System.Drawing.Size(366, 23);
             this.pgBar.Step = 1;
             this.pgBar.TabIndex = 50;
-            // 
-            // displayE
-            // 
-            this.displayE.ArrayCount = 6;
-            this.displayE.ColorBackground = System.Drawing.Color.Black;
-            this.displayE.ColorDark = System.Drawing.Color.Green;
-            this.displayE.ColorLight = System.Drawing.Color.Lime;
-            this.displayE.DecimalShow = true;
-            this.displayE.ElementPadding = new System.Windows.Forms.Padding(4);
-            this.displayE.ElementWidth = 10;
-            this.displayE.ItalicFactor = 0F;
-            this.displayE.Location = new System.Drawing.Point(49, 157);
-            this.displayE.Name = "displayE";
-            this.displayE.Size = new System.Drawing.Size(156, 36);
-            this.displayE.TabIndex = 3;
-            this.displayE.TabStop = false;
-            this.displayE.Value = "0000.00";
-            // 
-            // displayZ
-            // 
-            this.displayZ.ArrayCount = 6;
-            this.displayZ.ColorBackground = System.Drawing.Color.Black;
-            this.displayZ.ColorDark = System.Drawing.Color.Green;
-            this.displayZ.ColorLight = System.Drawing.Color.Lime;
-            this.displayZ.DecimalShow = true;
-            this.displayZ.ElementPadding = new System.Windows.Forms.Padding(4);
-            this.displayZ.ElementWidth = 10;
-            this.displayZ.ItalicFactor = 0F;
-            this.displayZ.Location = new System.Drawing.Point(49, 114);
-            this.displayZ.Name = "displayZ";
-            this.displayZ.Size = new System.Drawing.Size(156, 36);
-            this.displayZ.TabIndex = 2;
-            this.displayZ.TabStop = false;
-            this.displayZ.Value = "0000.00";
-            // 
-            // displayY
-            // 
-            this.displayY.ArrayCount = 6;
-            this.displayY.ColorBackground = System.Drawing.Color.Black;
-            this.displayY.ColorDark = System.Drawing.Color.Green;
-            this.displayY.ColorLight = System.Drawing.Color.Lime;
-            this.displayY.DecimalShow = true;
-            this.displayY.ElementPadding = new System.Windows.Forms.Padding(4);
-            this.displayY.ElementWidth = 10;
-            this.displayY.ItalicFactor = 0F;
-            this.displayY.Location = new System.Drawing.Point(49, 71);
-            this.displayY.Name = "displayY";
-            this.displayY.Size = new System.Drawing.Size(156, 36);
-            this.displayY.TabIndex = 1;
-            this.displayY.TabStop = false;
-            this.displayY.Value = "0000.00";
-            // 
-            // displayX
-            // 
-            this.displayX.ArrayCount = 6;
-            this.displayX.ColorBackground = System.Drawing.Color.Black;
-            this.displayX.ColorDark = System.Drawing.Color.Green;
-            this.displayX.ColorLight = System.Drawing.Color.Lime;
-            this.displayX.DecimalShow = true;
-            this.displayX.ElementPadding = new System.Windows.Forms.Padding(4);
-            this.displayX.ElementWidth = 10;
-            this.displayX.ItalicFactor = 0F;
-            this.displayX.Location = new System.Drawing.Point(49, 28);
-            this.displayX.Name = "displayX";
-            this.displayX.Size = new System.Drawing.Size(156, 36);
-            this.displayX.TabIndex = 0;
-            this.displayX.TabStop = false;
-            this.displayX.Value = "0000.00";
-            // 
-            // txtLaserTemp
-            // 
-            this.txtLaserTemp.ArrayCount = 4;
-            this.txtLaserTemp.ColorBackground = System.Drawing.Color.Black;
-            this.txtLaserTemp.ColorDark = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.txtLaserTemp.ColorLight = System.Drawing.Color.Red;
-            this.txtLaserTemp.DecimalShow = true;
-            this.txtLaserTemp.ElementPadding = new System.Windows.Forms.Padding(4);
-            this.txtLaserTemp.ElementWidth = 10;
-            this.txtLaserTemp.ItalicFactor = 0F;
-            this.txtLaserTemp.Location = new System.Drawing.Point(51, 228);
-            this.txtLaserTemp.Name = "txtLaserTemp";
-            this.txtLaserTemp.Size = new System.Drawing.Size(153, 50);
-            this.txtLaserTemp.TabIndex = 34;
-            this.txtLaserTemp.TabStop = false;
-            this.txtLaserTemp.Value = "";
             // 
             // frmCNCMain
             // 
