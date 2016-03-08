@@ -26,6 +26,7 @@ namespace CNCControl
         bool isConnect = false;
         Color defColor;
         bool bRunning;
+        bool ignoreOpenError;
 
 #region Declare Delegate
         public delegate void UpdatePositionDelegate(string str);
@@ -70,7 +71,7 @@ namespace CNCControl
               "D\\[([-+]?[0-9]*[\\\\.,]?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0" +
               "-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*)\\],C\\[([-+]?[0-9]*[\\\\." +
               ",]?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*);([-+]?[0-9]*[\\\\.,]" +
-              "?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*)\\],T\\[([-+]?[0-9]*[\\\\.,]?[0-9]*)\\].*",
+              "?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0-9]*)\\],T\\[([-+]?[0-9]*[\\\\.,]?[0-9]*)\\],M\\[([-+]?[0-9]*[\\\\.,]?[0-9]*)\\].*",
               RegexOptions.CultureInvariant | RegexOptions.Compiled
             );
             bCancel = true;
@@ -87,6 +88,7 @@ namespace CNCControl
             double mz, wz;
             double me, we;
             double tempLaser;
+            double memoryFree;
 
             if (cbUpdate.Checked != true) return;
             
@@ -107,18 +109,27 @@ namespace CNCControl
                 wz = double.Parse(groups[7].Value.ToString());
                 we = double.Parse(groups[8].Value.ToString());
                 tempLaser = double.Parse(groups[9].Value.ToString());
+                memoryFree = double.Parse(groups[10].Value.ToString());
 
                 displayX.Value = string.Format("{0:0.00}", wx);
                 displayY.Value = string.Format("{0:0.00}", wy);
                 displayZ.Value = string.Format("{0:0.00}", wz);
                 displayE.Value = string.Format("{0:0.00}", we);
                 txtLaserTemp.Value = string.Format("{0:0.00}", tempLaser);
+                txtMemoryFree.Text = string.Format("{0:0000}", memoryFree);
 
                 //Debug.WriteLine(string.Format("M X={0} Y={1} Z={2}", mx, my, mz));
                 //Debug.WriteLine(string.Format("W X={0} Y={1} Z={2}", wx, wy, wz));
 
             }
-            catch (Exception ex) { MessageBox.Show(str, ex.Message); }
+            catch (Exception ex) {
+                if (!ignoreOpenError)
+                {
+                    MessageBox.Show(str, ex.Message);
+                    ignoreOpenError = false;
+                }
+            }
+            ignoreOpenError = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -131,6 +142,7 @@ namespace CNCControl
                 cbPort.Items.Add(s);
             }
             comPort.BaudRate = 115200;
+            comPort.Encoding = new UTF8Encoding();
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
         }
 
@@ -143,6 +155,7 @@ namespace CNCControl
                     MessageBox.Show("Select a port,","No port selected");
                     return;
                 }
+                ignoreOpenError = true;
                 comPort.PortName = (string)cbPort.SelectedItem;
                 comPort.Open();
                 toolStripButton1.BackColor = Color.LightGreen;
@@ -167,24 +180,28 @@ namespace CNCControl
 
         private void button1_Click(object sender, EventArgs e)
         {
+            //////////if (txtCommand.Text != "")
+            //////////{
+            //////////    gCodeCommands = new List<string>();
+            //////////    Cursor.Current = Cursors.WaitCursor;
+            //////////    txtGCodePreview.Visible = true;
+            //////////    Application.DoEvents();
+            //////////    pgBar.Value = 0;
+            //////////    pgBar.Style = ProgressBarStyle.Marquee;
+            //////////    int idx = txtCommand.Lines.Count();
+            //////////    int curLine = 0;
+            //////////    foreach (string str in txtCommand.Lines)
+            //////////    {
+            //////////        gCodeCommands.Add(str);
+            //////////        pgBar.Value = 100 / (idx / ++curLine);
+            //////////        Application.DoEvents();
+            //////////    }
+            //////////}
+            //////////Cursor.Current = Cursors.Default;
             if (txtCommand.Text != "")
             {
-                gCodeCommands = new List<string>();
-                Cursor.Current = Cursors.WaitCursor;
-                txtGCodePreview.Visible = true;
-                Application.DoEvents();
-                pgBar.Value = 0;
-                pgBar.Style = ProgressBarStyle.Marquee;
-                int idx = txtCommand.Lines.Count();
-                int curLine = 0;
-                foreach (string str in txtCommand.Lines)
-                {
-                    gCodeCommands.Add(str);
-                    pgBar.Value = 100 / (idx / ++curLine);
-                    Application.DoEvents();
-                }
+                SerialWriteLine(txtCommand.Text);
             }
-            Cursor.Current = Cursors.Default;
         }
 
         public void SerialWrite(string cmd)
@@ -223,6 +240,7 @@ namespace CNCControl
         {
             txtResults.Text = "";
             txtComReceive.Text = "";
+            
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -253,7 +271,7 @@ namespace CNCControl
 
                     if (comPort.IsOpen) ACK = comPort.ReadLine();
                     ACK = ACK.ToUpper().Trim();
-
+                    //Console.WriteLine(DateTime.Now + " Rx: " + ACK);
                     // Read EEPROM
                     if (CurrentMode == eMode.READEEPROM)
                     {
@@ -327,7 +345,7 @@ namespace CNCControl
         {
             if (txtGCodePreview.Text != "")
             {
-                SerialWriteLine("M18");
+                //SerialWriteLine("M18");
                 bCancel = true;
                 bRunning = false;
                 string strTemp = "";
@@ -343,30 +361,35 @@ namespace CNCControl
                 pgBar.Value = 0;
                 pgBar.ForeColor = Color.Blue;
                 pgBar.Style = ProgressBarStyle.Marquee;
+                Application.DoEvents();
                 int idx = txtGCodePreview.Lines.Count();
                 //pgBar.Maximum = idx;
                 int curLine = 0;
                 foreach (string str in txtGCodePreview.Lines)
                 {                    
-                    x = str.IndexOf("P") + 1;
-                    if (str.StartsWith("A"))
+                    //////////x = str.IndexOf("P") + 1;
+                    //////////if (str.StartsWith("A"))
+                    //////////{
+                    //////////    strTemp = str.Substring(0, x);
+                    //////////    // convert Hexa to Binary
+                    //////////    while (x < str.Length)
+                    //////////    {
+                    //////////        high = str.ElementAt(x++);
+                    //////////        low = str.ElementAt(x++);
+                    //////////        val = ((high > '9' ? high - 55 : high - 48) << 4) + (low > '9' ? low - 55 : low - 48);
+                    //////////        strTemp += (char)val;
+                    //////////    }
+                    //////////    val = x;
+                    //////////    // trail
+                    //////////    strTemp += new string('\0', Const.MaxPixelPerCommandLine);
+                    //////////    strTemp = strTemp.Substring(0, 197);
+                    //////////}
+                    //////////else
                     {
-                        strTemp = str.Substring(0, x);
-                        // convert Hexa to Binary
-                        while (x < str.Length)
-                        {
-                            high = str.ElementAt(x++);
-                            low = str.ElementAt(x++);
-                            val = ((high > '9' ? high - 55 : high - 48) << 4) + (low > '9' ? low - 55 : low - 48);
-                            strTemp += (char)val;
-                        }
-                        val = x;
-                        // trail
-                        strTemp += new string('\0',Const.MaxPixelPerCommandLine);
-                        strTemp = strTemp.Substring(0, 197);
+                        strTemp = str;
                     }
-                    else strTemp = str;                 
-                    gCodeCommands.Add(strTemp);
+
+                    if (str != "") gCodeCommands.Add(strTemp);
                     pgBar.Value = 100/(idx / ++curLine);
                     Application.DoEvents();
                 }
@@ -392,7 +415,7 @@ namespace CNCControl
 
         private void button15_Click(object sender, EventArgs e)
         {
-            SerialWriteLine("M18");
+            SerialWriteLine("M1");
             bCancel = true;
             bRunning = false;
             //CommandThread.Suspend();
@@ -428,6 +451,8 @@ namespace CNCControl
         private void button14_Click(object sender, EventArgs e)
         {
             //WriteSerial("M17");
+            pgBar.Value = 0;
+            Application.DoEvents();
             bCancel = false;
             Console.WriteLine("Start: " + DateTime.Now);
             CommandThread = new Thread(gCodeThread);
@@ -443,22 +468,23 @@ namespace CNCControl
                 try
                 {
                     // si pixelSegment, on évite les CR/LF
-                    if (line.StartsWith("A"))
-                    {
-                        SerialWrite(line);
-                    }
-                    else
+                    //////////if (line.StartsWith("A"))
+                    //////////{
+                    //////////    SerialWrite(line);
+                    //////////}
+                    //////////else
                     {
                         SerialWriteLine(line);
                     }
                     WaitingACK = true;
+                    Console.WriteLine(DateTime.Now + " Tx: " + line);
                     while(WaitingACK == true) {  // on attend accusé de réception
                 	    Application.DoEvents();
                         Thread.Sleep(5);
                     }
                     if(bCancel == true) break;
                     Invoke(UpdateComReceiveTextAction, "OK");
-                    Invoke(UpdateComReceiveTextAction, line);
+                    //Invoke(UpdateComReceiveTextAction, line);
                 }
                 catch (Exception e)
                 {
@@ -527,7 +553,7 @@ namespace CNCControl
                     realX += pixSize * direction;
                     if (stepX == Const.MaxPixelPerCommandLine)
                     {
-                        outputFile.WriteLine("A X" + realX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " P" + str);
+                        outputFile.WriteLine("G5 X" + realX.ToString("##0.00").Trim() + " F" + FeedRate.ToString().Trim() + " S" + pixSize.ToString("#0.00") + " P" + str);
                         stepX = 0;
                         str = "";
                     }
@@ -815,6 +841,11 @@ namespace CNCControl
         private void txtResults_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            SerialWriteLine("M0");
         }
     }
 }
