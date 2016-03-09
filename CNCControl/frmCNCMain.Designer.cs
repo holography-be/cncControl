@@ -39,6 +39,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tbUpdate = new System.Windows.Forms.TrackBar();
+            this.txtMemoryFree = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -89,21 +91,19 @@
             this.button20 = new System.Windows.Forms.Button();
             this.pgBar = new System.Windows.Forms.ProgressBar();
             this.button3 = new System.Windows.Forms.Button();
-            this.txtMemoryFree = new System.Windows.Forms.TextBox();
-            this.tbUpdate = new System.Windows.Forms.TrackBar();
             this.displayE = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayZ = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayY = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.displayX = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.txtLaserTemp = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).BeginInit();
             this.SuspendLayout();
             // 
             // comPort
@@ -206,6 +206,27 @@
             this.groupBox1.TabIndex = 25;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Position";
+            // 
+            // tbUpdate
+            // 
+            this.tbUpdate.LargeChange = 1000;
+            this.tbUpdate.Location = new System.Drawing.Point(49, 383);
+            this.tbUpdate.Maximum = 6000;
+            this.tbUpdate.Minimum = 500;
+            this.tbUpdate.Name = "tbUpdate";
+            this.tbUpdate.Size = new System.Drawing.Size(155, 45);
+            this.tbUpdate.SmallChange = 500;
+            this.tbUpdate.TabIndex = 36;
+            this.tbUpdate.TickFrequency = 500;
+            this.tbUpdate.Value = 1000;
+            this.tbUpdate.Scroll += new System.EventHandler(this.tbUpdate_Scroll);
+            // 
+            // txtMemoryFree
+            // 
+            this.txtMemoryFree.Location = new System.Drawing.Point(49, 301);
+            this.txtMemoryFree.Name = "txtMemoryFree";
+            this.txtMemoryFree.Size = new System.Drawing.Size(155, 29);
+            this.txtMemoryFree.TabIndex = 35;
             // 
             // label9
             // 
@@ -680,8 +701,8 @@
             // 
             this.cbStepSize.FormattingEnabled = true;
             this.cbStepSize.Items.AddRange(new object[] {
-            "0.1",
             "0.01",
+            "0.1",
             "1",
             "10"});
             this.cbStepSize.Location = new System.Drawing.Point(328, 56);
@@ -695,11 +716,12 @@
             // 
             // button20
             // 
-            this.button20.Location = new System.Drawing.Point(375, 40);
+            this.button20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button20.Location = new System.Drawing.Point(181, 43);
             this.button20.Name = "button20";
-            this.button20.Size = new System.Drawing.Size(75, 23);
+            this.button20.Size = new System.Drawing.Size(149, 27);
             this.button20.TabIndex = 49;
-            this.button20.Text = "button20";
+            this.button20.Text = "Init Params";
             this.button20.UseVisualStyleBackColor = true;
             this.button20.Click += new System.EventHandler(this.button20_Click);
             // 
@@ -725,26 +747,6 @@
             this.button3.Text = "EMERGENCY STOP";
             this.button3.UseVisualStyleBackColor = false;
             this.button3.Click += new System.EventHandler(this.button3_Click_1);
-            // 
-            // txtMemoryFree
-            // 
-            this.txtMemoryFree.Location = new System.Drawing.Point(49, 301);
-            this.txtMemoryFree.Name = "txtMemoryFree";
-            this.txtMemoryFree.Size = new System.Drawing.Size(155, 29);
-            this.txtMemoryFree.TabIndex = 35;
-            // 
-            // tbUpdate
-            // 
-            this.tbUpdate.LargeChange = 1000;
-            this.tbUpdate.Location = new System.Drawing.Point(49, 383);
-            this.tbUpdate.Maximum = 6000;
-            this.tbUpdate.Minimum = 500;
-            this.tbUpdate.Name = "tbUpdate";
-            this.tbUpdate.Size = new System.Drawing.Size(155, 45);
-            this.tbUpdate.SmallChange = 500;
-            this.tbUpdate.TabIndex = 36;
-            this.tbUpdate.TickFrequency = 500;
-            this.tbUpdate.Value = 1000;
             // 
             // displayE
             // 
@@ -860,6 +862,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -870,7 +873,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

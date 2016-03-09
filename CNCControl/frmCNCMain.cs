@@ -77,7 +77,7 @@ namespace CNCControl
             bCancel = true;
             bRunning = false;
             cbDPI.SelectedIndex = 1;
-            cbStepSize.SelectedIndex = 0;
+            cbStepSize.SelectedIndex = 1;
             cbMode.SelectedIndex = 0;
         }
 
@@ -165,6 +165,10 @@ namespace CNCControl
                 //TimerStatusUpdate.Enabled = true;
                 lblMode.BackColor = System.Drawing.Color.LightGreen;
                 lblMode.Text = "CONNECTED";
+                Application.DoEvents();
+                //////////SerialWriteLine("M501");  // Pourquoi ?
+                //////////long longWait = DateTime.Now.Ticks;
+                //////////while (DateTime.Now.Ticks - longWait < 150000) { }
             }
             else 
             {
@@ -365,6 +369,9 @@ namespace CNCControl
                 int idx = txtGCodePreview.Lines.Count();
                 //pgBar.Maximum = idx;
                 int curLine = 0;
+                gCodeCommands.Add("M121");
+                gCodeCommands.Add("M114 T1000");
+                gCodeCommands.Add("G92 X0 Y0");
                 foreach (string str in txtGCodePreview.Lines)
                 {                    
                     //////////x = str.IndexOf("P") + 1;
@@ -508,6 +515,9 @@ namespace CNCControl
             double pixSize = 1 / (DPI / 25.4);
             int direction;
             int stepX;
+            char high;
+            char low;
+            int currentPixel;
             Image8Bit image = new Image8Bit(bitmapPicture);
             int pixelSize = (int)(Math.Round(1 / (DPI / 25.4), 2) * 100);
             byte[][] pixelTable;
@@ -547,7 +557,11 @@ namespace CNCControl
                 stepX = 0;
                 while (remainPixel > 0)
                 {
-                    str += pixelTable[y][(direction == 1 ? x : (pixelTable[y].Length - 1) - x)].ToString("X2");
+                    currentPixel = pixelTable[y][(direction == 1 ? x : (pixelTable[y].Length - 1) - x)];
+                    high = (char)((currentPixel >> 4) + 65);
+                    low = (char)((currentPixel & 15) + 65);
+                    //Console.WriteLine(val.ToString() + " : " + high + low);
+                    str += high.ToString() + low.ToString();
                     stepX++;
                     x++;
                     realX += pixSize * direction;
@@ -802,9 +816,7 @@ namespace CNCControl
 
         private void button20_Click(object sender, EventArgs e)
         {
-            Application.UseWaitCursor = true;
-            Application.DoEvents();
-            Cursor.Position = Cursor.Position;
+            SerialWriteLine("M501");            
         }
 
         private void txtMaxLaserTemp_TextChanged(object sender, EventArgs e)
@@ -846,6 +858,12 @@ namespace CNCControl
         private void button3_Click_1(object sender, EventArgs e)
         {
             SerialWriteLine("M0");
+        }
+
+        private void tbUpdate_Scroll(object sender, EventArgs e)
+        {
+            string strCommand = "M114 T" + tbUpdate.Value.ToString().Trim();
+            SerialWriteLine(strCommand);
         }
     }
 }
