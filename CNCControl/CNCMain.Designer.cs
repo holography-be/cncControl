@@ -109,6 +109,11 @@
             this.tpSetting = new System.Windows.Forms.TabPage();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pgBar = new System.Windows.Forms.ProgressBar();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button9 = new System.Windows.Forms.Button();
+            this.button12 = new System.Windows.Forms.Button();
+            this.button19 = new System.Windows.Forms.Button();
+            this.button20 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -567,6 +572,11 @@
             // 
             // tpImage
             // 
+            this.tpImage.Controls.Add(this.button20);
+            this.tpImage.Controls.Add(this.button19);
+            this.tpImage.Controls.Add(this.button12);
+            this.tpImage.Controls.Add(this.button9);
+            this.tpImage.Controls.Add(this.button2);
             this.tpImage.Controls.Add(this.txtRes);
             this.tpImage.Controls.Add(this.lblImageAction);
             this.tpImage.Controls.Add(this.groupBox2);
@@ -589,7 +599,6 @@
             this.tpImage.Padding = new System.Windows.Forms.Padding(3);
             this.tpImage.Size = new System.Drawing.Size(1152, 757);
             this.tpImage.TabIndex = 1;
-            this.tpImage.Text = "Image";
             this.tpImage.UseVisualStyleBackColor = true;
             // 
             // txtRes
@@ -1017,6 +1026,56 @@
             this.pgBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.pgBar.TabIndex = 50;
             // 
+            // button2
+            // 
+            this.button2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button2.BackgroundImage")));
+            this.button2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button2.Location = new System.Drawing.Point(804, 232);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(30, 30);
+            this.button2.TabIndex = 18;
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button9
+            // 
+            this.button9.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button9.BackgroundImage")));
+            this.button9.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button9.Location = new System.Drawing.Point(840, 232);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(30, 30);
+            this.button9.TabIndex = 19;
+            this.button9.UseVisualStyleBackColor = true;
+            // 
+            // button12
+            // 
+            this.button12.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button12.BackgroundImage")));
+            this.button12.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button12.Location = new System.Drawing.Point(876, 232);
+            this.button12.Name = "button12";
+            this.button12.Size = new System.Drawing.Size(30, 30);
+            this.button12.TabIndex = 20;
+            this.button12.UseVisualStyleBackColor = true;
+            // 
+            // button19
+            // 
+            this.button19.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button19.BackgroundImage")));
+            this.button19.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button19.Location = new System.Drawing.Point(912, 232);
+            this.button19.Name = "button19";
+            this.button19.Size = new System.Drawing.Size(30, 30);
+            this.button19.TabIndex = 21;
+            this.button19.UseVisualStyleBackColor = true;
+            // 
+            // button20
+            // 
+            this.button20.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button20.BackgroundImage")));
+            this.button20.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button20.Location = new System.Drawing.Point(948, 232);
+            this.button20.Name = "button20";
+            this.button20.Size = new System.Drawing.Size(30, 30);
+            this.button20.TabIndex = 22;
+            this.button20.UseVisualStyleBackColor = true;
+            // 
             // CNCMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1137,6 +1196,11 @@
         internal System.Windows.Forms.DataGridViewTextBoxColumn data;
         private System.Windows.Forms.Label lblImageAction;
         private System.Windows.Forms.TextBox txtRes;
+        private System.Windows.Forms.Button button20;
+        private System.Windows.Forms.Button button19;
+        private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.Button button2;
     }
 }
 
