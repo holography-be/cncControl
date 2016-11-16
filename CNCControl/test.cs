@@ -28,7 +28,7 @@ namespace CNCControl
         public void SetTextMethod(string str)
         {
             //label1.Text = str;
-            ((frmCNCMain)(this.Owner)).CurrentMode = eMode.READEEPROM;
+            ((CNCMain)(this.Owner)).CurrentMode = eMode.READEEPROM;
         }
 
         private void test_Load(object sender, EventArgs e)

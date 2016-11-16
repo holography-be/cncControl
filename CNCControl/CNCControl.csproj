@@ -45,6 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clsPosition.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="clsSerial.cs" />
     <Compile Include="Const.cs" />
     <Compile Include="frmEEPROM.cs">
       <SubType>Form</SubType>
@@ -52,11 +56,17 @@
     <Compile Include="frmEEPROM.Designer.cs">
       <DependentUpon>frmEEPROM.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmCNCMain.cs">
+    <Compile Include="CNCMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmCNCMain.Designer.cs">
-      <DependentUpon>frmCNCMain.cs</DependentUpon>
+    <Compile Include="CNCMain.Designer.cs">
+      <DependentUpon>CNCMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImageEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImageEditor.Designer.cs">
+      <DependentUpon>ImageEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,8 +86,11 @@
     <EmbeddedResource Include="frmEEPROM.resx">
       <DependentUpon>frmEEPROM.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmCNCMain.resx">
-      <DependentUpon>frmCNCMain.cs</DependentUpon>
+    <EmbeddedResource Include="CNCMain.resx">
+      <DependentUpon>CNCMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImageEditor.resx">
+      <DependentUpon>ImageEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -110,6 +123,9 @@
       <Project>{bb14d35a-dcf3-48d5-8aa5-97e544f5bdc6}</Project>
       <Name>ImageProcessing</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

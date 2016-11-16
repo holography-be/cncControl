@@ -24,7 +24,7 @@ namespace CNCControl
         public delegate void WriteEEPROMValuesDelegate();
         public ReadEEPROMValuesDelegate ReadEEPROMValuesAction;
         public WriteEEPROMValuesDelegate WriteEEPROMValuesAction;
-        frmCNCMain frmParent;
+        CNCMain frmParent;
 
         public frmEEPROM()
         {
@@ -40,7 +40,7 @@ namespace CNCControl
         {
             strConfig = new List<string>();
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
-            frmParent = (frmCNCMain)this.Owner;
+            frmParent = (CNCMain)this.Owner;
         }
 
         private void ReadEEPROMValues(List<string> EEPROMValues)
