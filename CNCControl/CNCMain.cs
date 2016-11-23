@@ -14,7 +14,7 @@ using System.Threading;
 using ImageProcessing;
 using System.Drawing.Imaging;
 using System.IO;
-
+using System.Runtime.InteropServices;
 
 
 namespace CNCControl
@@ -83,6 +83,9 @@ namespace CNCControl
             cbDPI.SelectedIndex = 1;
             cbStepSize.SelectedIndex = 1;
             cbMode.SelectedIndex = 0;
+
+            cbScan.SelectedItem = "Horizontal";
+            cbPowerDivisor.SelectedItem = "1";
         }
 
         public void UpdatePosition(string str)
@@ -699,115 +702,347 @@ namespace CNCControl
         //////////    ////////return strReturn;
         //////////}
 
-        private string gCodeFromBitMap(Bitmap bitmapPicture, double orgX = 0.0, double orgY = 0.0, int FeedRate = 2500, int DPI = 72, int Mode = 1)
+        private int interpolate(int pixel, int min, int max) {
+            pixel = 255 - pixel;
+            Int32 dif=max-min;
+            return (min + ((pixel * dif) / 255));
+        }
+
+        float lastX;
+        float lastY;
+        int lastPixel;
+        float currentX;
+        float currentY;
+        int currentPixel;
+
+        private string generateLine() {
+            //Generate Gcode line
+            string line = "";
+            if (currentX != lastX)//Add X coord to line if is diferent from previous             
+            {
+                line += 'X' + string.Format(CultureInfo.InvariantCulture.NumberFormat, "{0:0.###}", currentX);
+            }
+            if (currentX != lastY)//Add Y coord to line if is diferent from previous
+            {
+                line += 'Y' +  string.Format(CultureInfo.InvariantCulture.NumberFormat, "{0:0.###}", currentY);
+            }
+            if (currentPixel != lastPixel)//Add power value to line if is diferent from previous
+            {
+                line += "S" + Convert.ToString(currentPixel);
+            }
+            return line;
+        }
+
+        private string gCodeFromBitMap(Bitmap bitmap, double orgX = 0.0, double orgY = 0.0, int FeedRate = 2500, int DPI = 72, int Mode = 1)
         {
-            string str = "";
-            int x;
-            int y;
-            int remainPixel;
-            double realX;
-            double realY;
-            double oldX;
-            double pixSize = 25.4 / DPI;
-            int direction;
-            int stepX;
-            char high;
-            char low;
-            int currentPixel;
-            int oldPixel;
-            Image8Bit image = new Image8Bit(bitmapPicture);
-            int pixelSize;
-            pixelSize = (int)(Math.Round(1 / (DPI / 25.4), 2) * 100);
+            // TODO : optimiser lignes : trouver le 1er pixel non "blanc" (0) pour positioner rapidement le laser à la position du 1er pixel utile.
+            int col = 0;
+            int line = 0;
+            int currentPixel = 0;
+            int firstPixel = -1;
+            int lastPixel = -1;
+            int countPixel;
+            int direction = 0;  // 0 = left to right, 1 = right to left
+            List<String> lines = new List<string>();
+            int maxPixel = Int32.Parse(txtMaxPixel.Text);
+            int minPixel = Int32.Parse(txtMinPixel.Text);
+            float coordX = -1;
+            float coordY = -1;
+            float resolution = Convert.ToSingle(txtRes.Text);
+            string strCoord;
+            int startX;
+            int endX;
+            int incX;
+
+            // transfert pixels
             byte[][] pixelTable;
-            realY = orgY;
-            realX = orgX;
-            pixelTable = new byte[image.Height][];
+            int[][] pixelUtil;  // pour chaque ligne, 1er et dernier pixel utile (non blanc)
+            pixelTable = new byte[bitmap.Height][];
+            pixelUtil = new int[bitmap.Height][];
             pgBar.Minimum = 0;
-            pgBar.Maximum = image.Height * image.Width;
+            pgBar.Maximum = bitmap.Height * bitmap.Width;
             pgBar.ForeColor = Color.Red;
-            for (y = 0; y < image.Height; y++)
+            try
             {
-                pixelTable[y] = new byte[image.Width];
-                for (x = 0; x < image.Width; x++)
+                for (line = 0; line < bitmap.Height; line++)
                 {
-                    pixelTable[y][x] = (image.GetPixel(x, y).B);
+                    pixelTable[line] = new byte[bitmap.Width];
+                    pixelUtil[line] = new int[2];
+                    pixelUtil[line][0] = pixelUtil[line][1] = -1;
+                    lastPixel = -1;
+                    firstPixel = -1;
+                    for (col = 0; col < bitmap.Width; col++)
+                    {
+                        currentPixel = interpolate(bitmap.GetPixel(col, line).B, minPixel, maxPixel);
+                        if (currentPixel != 0) {
+                            if (firstPixel == -1) { // on a trouvé le 1er pixel                                
+                                firstPixel = col;
+                            }
+                            lastPixel = col;    // on assume que c'est le dernier pixel
+                        }
+                        pixelTable[line][col] = (byte)currentPixel;
+                    }
+                    pixelUtil[line][0] = firstPixel;
+                    pixelUtil[line][1] = lastPixel;
+                    pgBar.Value = (line + 1) * col;
+                    Application.DoEvents();
                 }
-                pgBar.Value = (y + 1) * x;
-                Application.DoEvents();
             }
-            image.Dispose();
-            Application.DoEvents();
-            pgBar.Value = 0;
-            pgBar.Maximum = pixelTable.Length;
-            pgBar.ForeColor = Color.Green;
-            str = "";
-            realY = orgY;
-            realX = orgX;
-            StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
-            //for (realX = 0; realX < 100; realX+=0.18)
-            //{
-            //    outputFile.WriteLine("X" + realX.ToString("##0.00")); // + " F" + FeedRate.ToString().Trim());
-            //}
-            outputFile.WriteLine("G21");
-            outputFile.WriteLine("F" + FeedRate.ToString("#0").Trim());
-            outputFile.WriteLine("S0");
-            outputFile.WriteLine("G01 X0 Y0 Z0");
-            outputFile.WriteLine("M3");
-            for (y = 0; y < (pixelTable.Length); y++)
+            catch (Exception ex)
             {
-                direction = ((y % 2) == 0 ? 1 : -1);
-                realX = (direction == -1 ? realX : orgX);
-                outputFile.WriteLine("G0 Y" + realY.ToString("##0.00") + " S0");
-                remainPixel = pixelTable[y].Length;
-                x = 0;
-                str = "";
-                stepX = 0;
-                oldPixel = -1;
-                oldX = realX;
-                currentPixel = -1;
-                while (remainPixel > 0)
-                {
-                    currentPixel = pixelTable[y][(direction == 1 ? x : (pixelTable[y].Length - 1) - x)];
-                    //if (oldPixel == -1)
-                    //{
-                    //    oldPixel = currentPixel;
-                    //}
-                    //high = (char)((currentPixel >> 4) + 65);
-                    //low = (char)((currentPixel & 15) + 65);
-                    //Console.WriteLine(val.ToString() + " : " + high + low);
-                    //str += high.ToString() + low.ToString();
-                    stepX++;
-                    x++;
-                    realX += pixSize * direction;
-                    outputFile.WriteLine("X" + realX.ToString("##0.00").Trim() + " S" + (255 - currentPixel).ToString("#0").Trim());
-                    //outputFile.WriteLine("X" + realX.ToString("##0.00").Trim() + " S" + ((remainPixel % 2)*255).ToString("#0").Trim());
-                    //if (oldPixel != currentPixel)
-                    //{
-                    //    // new x coordonates
-                    //    outputFile.WriteLine("G0 X" + realX.ToString("##0.00").Trim()); // + " S" + oldPixel.ToString("#0").Trim());
-                    //    oldPixel = currentPixel;
-                    //    oldX = realX;
-                    //}
-                    remainPixel--;
-                }
-                // derniers pixels
-                //outputFile.WriteLine("X" + realX.ToString("##0.00").Trim() + " S" + (255 - currentPixel).ToString("#0").Trim());
-                pgBar.Value = y + 1;
-                Application.DoEvents();
-                realY += ((double)pixelSize) / 100;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
             }
-            Application.DoEvents();
+
+
+            lines.Add("$28=" + cbPowerDivisor.SelectedItem.ToString().Trim());
+            lines.Add("G0 X0 Y0 Z0");
+            lines.Add("F" + txtFeedRate.Text);
+            lines.Add("M8");
+            lines.Add("M3");
+
+
+
+            if (cbScan.SelectedItem.ToString() == "Horizontal")
+            {
+                pgBar.Minimum = 0;
+                pgBar.Maximum = bitmap.Height;
+                pgBar.ForeColor = Color.Green;
+                for (line = 0; line < bitmap.Height; line++)
+                {
+                    coordY = (float)line * resolution;
+                    strCoord = "Y" + coordY.ToString("###0.00") + "S0";
+                    lines.Add(strCoord);
+                    if ((pixelUtil[line][0] != -1) && (pixelUtil[line][1] != -1)) // on a au moins trouvé un pixel utile, sinon la ligne est remplie de pixels blancs
+                    {
+                        if (direction == 0)
+                        {
+                            incX = 1;
+                            col = pixelUtil[line][0];   // 1er pixel
+                            endX = pixelUtil[line][1] + 1;  // dernier pixel (+1 car le pixel a une superficie) 
+                            coordX = (float)(col) * resolution;
+                        }
+                        else
+                        {
+                            incX = -1;
+                            col = pixelUtil[line][1];   // dernier pixel mais on va de droite à gauche
+                            endX = pixelUtil[line][0];  // 1er pixel
+                            coordX = (float)(col + 1) * resolution;
+                        }
+                        // avance rapide au 1er pixel utile
+                        strCoord = "X" + coordX.ToString("###0.00") + "S0";
+                        lines.Add(strCoord);
+                        //// Premier pixel utile (autre que 0)
+                        //lastPixel = -1;
+                        //int i;
+                        //for (i = col;i != endX; i = i + incX ) {
+                        //    lastPixel = interpolate(bitmap.GetPixel(i, line).R,minPixel,maxPixel);
+                        //    if (lastPixel != 0)
+                        //    {
+                        //        coordX = (float)i * resolution;
+                        //        strCoord = "X" + coordX.ToString("###0.00") + "S0";
+                        //        lines.Add(strCoord);
+                        //        break;
+                        //    }
+                        //}
+                        //if (lastPixel != 0)
+                        //{
+                            //col = i + incX;
+                            //lastPixel = interpolate(bitmapPicture.GetPixel(col, line).R,minPixel,maxPixel);
+                        lastPixel = pixelTable[line][col];  // 1er pixel (pour commencer séquence de pixel contigu)
+                            countPixel = 0;
+                            col += incX;  // prochain pixel
+                            for (; ; )
+                            {
+                                //currentPixel = interpolate(bitmap.GetPixel(col, line).R, minPixel, maxPixel);
+                                currentPixel = pixelTable[line][col];
+                                if (lastPixel != currentPixel)
+                                {
+                                    if (direction == 0)
+                                    {
+                                        coordX = (float)col * resolution;
+                                    }
+                                    else
+                                    {
+                                        coordX = (float)(col + 1) * resolution;
+                                    }
+
+                                    strCoord = "X" + coordX.ToString("###0.00") + "S" + lastPixel.ToString("##0");
+                                    if ((countPixel > 5) && (lastPixel == 0))
+                                    {
+                                        strCoord += "F1000"; // +txtFeedRate.Text;
+                                    }
+                                    lastPixel = currentPixel;
+                                    countPixel = 0;
+                                    lines.Add(strCoord);
+                                }
+                                else
+                                {
+                                    countPixel++;
+                                }
+                                col += incX;
+                                if (col == endX)
+                                {
+                                    coordX = (float)col * resolution;
+                                    strCoord = "X" + coordX.ToString("###0.00") + "S" + lastPixel.ToString("##0");
+                                    if ((countPixel > 5) && (lastPixel == 0))
+                                    {
+                                        strCoord += "F1000"; // +txtFeedRate.Text;
+                                    }
+                                    lines.Add(strCoord);
+                                    break;
+                                }
+                            }
+                        //}
+                        direction = (direction == 0) ? 1 : 0;
+                    }
+                    pgBar.Value = (line + 1);
+                    Application.DoEvents();
+                }
+
+            }
+            else
+            {
+                // diagonal
+
+            }
+
+            StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"),false);
+            foreach (string str in lines)
+            {
+                outputFile.WriteLine(str);
+            }
             outputFile.Close();
             outputFile.Dispose();
-            Cursor.Current = Cursors.Default;
+            Application.DoEvents();
+
+
 
             return "";
+            //string str = "";
+            //int x;
+            //int y;
+            //int remainPixel;
+            //double realX;
+            //double realY;
+            //double oldX;
+            //double pixSize = 25.4 / DPI;
+            //int direction;
+            //int stepX;
+            //char high;
+            //char low;
+            //int currentPixel;
+            //int oldPixel;
+            //Bitmap image = new Bitmap(bitmapPicture);
+            //int pixelSize;
+            //pixelSize = (int)(Math.Round(1 / (DPI / 25.4), 2) * 100);
+            //byte[][] pixelTable;
+            //realY = orgY;
+            //realX = orgX;
+            //pixelTable = new byte[image.Height][];
+            //pgBar.Minimum = 0;
+            //pgBar.Maximum = image.Height * image.Width;
+            //pgBar.ForeColor = Color.Red;
+            //for (y = 0; y < image.Height; y++)
+            //{
+            //    pixelTable[y] = new byte[image.Width];
+            //    for (x = 0; x < image.Width; x++)
+            //    {
+            //        pixelTable[y][x] = (image.GetPixel(x, y).B);
+            //    }
+            //    pgBar.Value = (y + 1) * x;
+            //    Application.DoEvents();
+            //}
+            //image.Dispose();
+            //Application.DoEvents();
+            //pgBar.Value = 0;
+            //pgBar.Maximum = pixelTable.Length;
+            //pgBar.ForeColor = Color.Green;
+            //str = "";
+            //realY = orgY;
+            //realX = orgX;
+            //StreamWriter outputFile = new StreamWriter(Application.LocalUserAppDataPath + Convert.ToString("\\tmpgCode.txt"));
+            ////for (realX = 0; realX < 100; realX+=0.18)
+            ////{
+            ////    outputFile.WriteLine("X" + realX.ToString("##0.00")); // + " F" + FeedRate.ToString().Trim());
+            ////}
+            //outputFile.WriteLine("G21");
+            //outputFile.WriteLine("F" + FeedRate.ToString("#0").Trim());
+            //outputFile.WriteLine("S0");
+            //outputFile.WriteLine("G0 X0 Y0 Z0");
+            //outputFile.WriteLine("M8");
+            //outputFile.WriteLine("M3");
+            //outputFile.WriteLine("G1");
+            //direction = 1;
+            //int col=0;
+            //for (int line = 0; line < bitmapPicture.Height; line++) {
+            //    col = (direction == 1) ? 0 : bitmapPicture.Width;
+            //    for (x=0;x<bitmapPicture.Width;x++) {
+            //        currentPixel = interpolate(255 - pixelTable[line][col],0,255);
+            //        col--;
+            //    }
+            //    direction *= -1;
+            //}
+
+
+
+
+
+            //for (x = 0; x < (pixelTable.Length); x++)
+            //{
+            //    direction = ((x % 2) == 0 ? 1 : -1);
+            //    realX = (direction == -1 ? realX : orgX);
+            //    outputFile.WriteLine("G0 Y" + realY.ToString("##0.00") + " S0");
+            //    remainPixel = pixelTable[x].Length;
+            //    x = 0;
+            //    str = "";
+            //    stepX = 0;
+            //    oldPixel = -1;
+            //    oldX = realX;
+            //    currentPixel = -1;
+            //    while (remainPixel > 0)
+            //    {
+            //        currentPixel = pixelTable[x][(direction == 1 ? y : (pixelTable[x].Length - 1) - y)];
+            //        //if (oldPixel == -1)
+            //        //{
+            //        //    oldPixel = currentPixel;
+            //        //}
+            //        //high = (char)((currentPixel >> 4) + 65);
+            //        //low = (char)((currentPixel & 15) + 65);
+            //        //Console.WriteLine(val.ToString() + " : " + high + low);
+            //        //str += high.ToString() + low.ToString();
+            //        stepX++;
+            //        x++;
+            //        realX += pixSize * direction;
+            //        outputFile.WriteLine("X" + realX.ToString("##0.00").Trim() + " S" + (255 - currentPixel).ToString("#0").Trim());
+            //        //outputFile.WriteLine("X" + realX.ToString("##0.00").Trim() + " S" + ((remainPixel % 2)*255).ToString("#0").Trim());
+            //        //if (oldPixel != currentPixel)
+            //        //{
+            //        //    // new x coordonates
+            //        //    outputFile.WriteLine("G0 X" + realX.ToString("##0.00").Trim()); // + " S" + oldPixel.ToString("#0").Trim());
+            //        //    oldPixel = currentPixel;
+            //        //    oldX = realX;
+            //        //}
+            //        remainPixel--;
+            //    }
+            //    // derniers pixels
+            //    //outputFile.WriteLine("X" + realX.ToString("##0.00").Trim() + " S" + (255 - currentPixel).ToString("#0").Trim());
+            //    pgBar.Value = y + 1;
+            //    Application.DoEvents();
+            //    realY += ((double)pixelSize) / 100;
+            //}
+            //Application.DoEvents();
+            //outputFile.Close();
+            //outputFile.Dispose();
+            //Cursor.Current = Cursors.Default;
+
+            //return "";
 
 
         }
 
         private void button16_Click(object sender, EventArgs e)
         {
+            //cbRender.SelectedIndex = 0;
             txtGCodePreview.Visible = false;
             OpenFileDialog dlg = new OpenFileDialog();
 
@@ -824,11 +1059,10 @@ namespace CNCControl
                     tbBrightness.Value = 0;
                     tbContrast.Value = 0;
                     tbGamma.Value = 100;
-                    imageToPrint = imgGrayscale(imageToPrint);
-                    pictureBox1.BackgroundImage = imageToPrint;
-                    adjustedImage = imageToPrint;
-                    Refresh();
-                    userAdjust();
+                    pictureBox1.Image = new Bitmap(imageToPrint);
+                    adjustedImage = new Bitmap(imageToPrint);
+                    //Refresh();
+                    //userAdjust();
                 }
                 catch (Exception exc)
                 {
@@ -842,7 +1076,7 @@ namespace CNCControl
         {                    
             string temp = "";
             txtGCodePreview.Visible = false;
-            if (pictureBox1.BackgroundImage != null)
+            if (adjustedImage != null)
             {
                 Application.UseWaitCursor = true;
                 Cursor.Current = Cursors.Default;
@@ -864,9 +1098,7 @@ namespace CNCControl
                     {
                         mode = 2;
                     }                   
-                    gCodeFromPicture = new List<string>();
-                    temp = gCodeFromBitMap(imageToPrint,FeedRate:feedRate,DPI:DPI,Mode:mode);
-                    //foreach (string line in )
+                    temp = gCodeFromBitMap(adjustedImage,FeedRate:feedRate,DPI:DPI,Mode:mode);
                 }
                 catch (Exception ex)
                 {
@@ -1018,8 +1250,8 @@ namespace CNCControl
         {
             try
             {
-                //if (adjustedImage == null) return;//if no image, do nothing
-                adjustedImage = imageToPrint;
+                if (adjustedImage == null) return;//if no image, do nothing
+                //adjustedImage = imageToPrint;
                 //Apply resize to original image
                 Int32 xSize;//Total X pixels of resulting image for GCode generation
                 Int32 ySize;//Total Y pixels of resulting image for GCode generation
@@ -1143,16 +1375,186 @@ namespace CNCControl
             return (output);
         }
 
+        //Apply dirthering to an image (Convert to 1 bit)
+        private Bitmap imgDirther(Bitmap input)
+        {
+            lblImageAction.Text = "Dirthering...";
+            Refresh();
+            var masks = new byte[] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+            var output = new Bitmap(input.Width, input.Height, PixelFormat.Format1bppIndexed);
+            var data = new sbyte[input.Width, input.Height];
+            var inputData = input.LockBits(new Rectangle(0, 0, input.Width, input.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            try
+            {
+                var scanLine = inputData.Scan0;
+                var line = new byte[inputData.Stride];
+                for (var y = 0; y < inputData.Height; y++, scanLine += inputData.Stride)
+                {
+                    Marshal.Copy(scanLine, line, 0, line.Length);
+                    for (var x = 0; x < input.Width; x++)
+                    {
+                        data[x, y] = (sbyte)(64 * (GetGreyLevel(line[x * 3 + 2], line[x * 3 + 1], line[x * 3 + 0]) - 0.5));
+                    }
+                }
+            }
+            finally
+            {
+                input.UnlockBits(inputData);
+            }
+            var outputData = output.LockBits(new Rectangle(0, 0, output.Width, output.Height), ImageLockMode.WriteOnly, PixelFormat.Format1bppIndexed);
+            try
+            {
+                var scanLine = outputData.Scan0;
+                for (var y = 0; y < outputData.Height; y++, scanLine += outputData.Stride)
+                {
+                    var line = new byte[outputData.Stride];
+                    for (var x = 0; x < input.Width; x++)
+                    {
+                        var j = data[x, y] > 0;
+                        if (j) line[x / 8] |= masks[x % 8];
+                        var error = (sbyte)(data[x, y] - (j ? 32 : -32));
+                        if (x < input.Width - 1) data[x + 1, y] += (sbyte)(7 * error / 16);
+                        if (y < input.Height - 1)
+                        {
+                            if (x > 0) data[x - 1, y + 1] += (sbyte)(3 * error / 16);
+                            data[x, y + 1] += (sbyte)(5 * error / 16);
+                            if (x < input.Width - 1) data[x + 1, y + 1] += (sbyte)(1 * error / 16);
+                        }
+                    }
+                    Marshal.Copy(line, 0, scanLine, outputData.Stride);
+                }
+            }
+            finally
+            {
+                output.UnlockBits(outputData);
+            }
+            lblImageAction.Text = "Done";
+            Refresh();
+            return (output);
+        }
+
+        private static double GetGreyLevel(byte r, byte g, byte b)//aux for dirthering
+        {
+            return (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+        }
+
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            pictureBox1.Image = imageToPrint;
+            pictureBox1.Image = new Bitmap(imageToPrint);
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
+            pictureBox1.Image = new Bitmap(adjustedImage);
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            adjustedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
             pictureBox1.Image = adjustedImage;
+            Refresh();
+        }
+
+        private void button9_Click_2(object sender, EventArgs e)
+        {
+            adjustedImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            pictureBox1.Image = adjustedImage;
+            Refresh();
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            adjustedImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            pictureBox1.Image = adjustedImage;
+            Refresh();
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            adjustedImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            pictureBox1.Image = adjustedImage;
+            Refresh();
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            adjustedImage = imgInvert(adjustedImage);
+            pictureBox1.Image = adjustedImage;
+            Refresh();
+        }
+
+        private void cbRender_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (adjustedImage == null) return;
+            if (cbRender.SelectedIndex == 1)
+            {
+                lblImageAction.Text = "Dirtering...";
+                adjustedImage = imgDirther(adjustedImage);
+                pictureBox1.Image = adjustedImage;
+                lblImageAction.Text = "Done";
+                Refresh();
+            }
+            else if(cbRender.SelectedIndex == 0)
+            {
+                lblImageAction.Text = "Gray scale...";
+                adjustedImage = imgGrayscale(adjustedImage);
+                lblImageAction.Text = "Done";
+                Refresh();
+                userAdjust();
+            }
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            var mate = new string[10,15];
+
+            for (int y = 0; y < 15; y++)
+            {
+                for (int x = 0; x < 10; x++)
+                {
+                    mate[x, y] = "[" + x.ToString("00") + "," + y.ToString("00") + "]";
+                }
+            }
+            for (int y = 0; y < 15; y++)
+            {
+                for (int x = 0; x < 10; x++)
+                {
+                    tbMatrice.Text += mate[x, y];
+                }
+                tbMatrice.Text += Environment.NewLine + Environment.NewLine;
+            }
+            Application.DoEvents();
+            int col = 0;
+            int line = 0;
+            int maxX = 10;
+            int maxY = 15;
+            int curX = 0;
+            int curY = 0;
+            int toX = 0;
+            int toY = 1;
+            int dirX = 1;
+            int dirY = 1;
+            int lastX = 0;
+            int lastY = 0;
+            tbMatrice.Text = "";
+
+
+
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            // reset image
+            adjustedImage = new Bitmap(imageToPrint);
+            pictureBox1.Image = new Bitmap(imageToPrint);
+            Refresh();
         }
 
 
     }
+
+
+
+
+   
 }
