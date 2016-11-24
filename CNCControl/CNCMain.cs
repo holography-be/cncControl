@@ -79,7 +79,6 @@ namespace CNCControl
 #endregion
             floatStyles = NumberStyles.Number;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
-            defColor = txtLaserTemp.BackColor;
             // Regex pour status D[xxx;yyy;zzz;eee],C[xxx;yyy;zzz;eee],T[temp]
             PositionRegex = new Regex(
               "D\\[([-+]?[0-9]*[\\\\.,]?[0-9]*);([-+]?[0-9]*[\\\\.,]?[0" +
@@ -134,11 +133,11 @@ namespace CNCControl
                 tempLaser = double.Parse(groups[9].Value.ToString());
                 memoryFree = double.Parse(groups[10].Value.ToString());
 
-                displayX.Value = string.Format("{0:0.00}", wx);
-                displayY.Value = string.Format("{0:0.00}", wy);
-                displayZ.Value = string.Format("{0:0.00}", wz);
-                displayE.Value = string.Format("{0:0.00}", we);
-                txtLaserTemp.Value = string.Format("{0:0.00}", tempLaser);
+                //displayX.Value = string.Format("{0:0.00}", wx);
+                //displayY.Value = string.Format("{0:0.00}", wy);
+                //displayZ.Value = string.Format("{0:0.00}", wz);
+                //displayE.Value = string.Format("{0:0.00}", we);
+                //txtLaserTemp.Value = string.Format("{0:0.00}", tempLaser);
                 txtMemoryFree.Text = string.Format("{0:0000}", memoryFree);
 
                 //Debug.WriteLine(string.Format("M X={0} Y={1} Z={2}", mx, my, mz));

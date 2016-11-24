@@ -61,10 +61,10 @@ partial class CNCMain {
                 machinePositions = positions[1].Split(',');
                 workPositions = positions[2].Split(',');
                 laserTemp = positions[5].Split(',')[0];
-                _gui.displayX.Value = workPositions[0];
-                _gui.displayY.Value = workPositions[1];
-                _gui.displayZ.Value = workPositions[2];
-                _gui.txtLaserTemp.Value = laserTemp;
+                //_gui.displayX.Value = workPositions[0];
+                //_gui.displayY.Value = workPositions[1];
+                //_gui.displayZ.Value = workPositions[2];
+                //_gui.txtLaserTemp.Value = laserTemp;
 
             }
         }
