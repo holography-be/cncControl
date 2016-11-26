@@ -12,5 +12,8 @@ namespace CNCControl
         public const int DefaultFeedRate = 2500;
         public const int DefaultDPI = 150;
         public const int DefaultMode = 1;
+
+
+
     }
 }

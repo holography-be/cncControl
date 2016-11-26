@@ -61,11 +61,17 @@ namespace CNCControl
         Bitmap imageToPrint;
         Bitmap adjustedImage;
         List<string> gCodeFromPicture;
+        float DPI;
+        float DPI_Laser;
+        float ratio;
 
+        bool reload = false;    // flag pour reload image (empêcher resize si reload)
         NumberStyles floatStyles;
 
-        string oldSizeX = "";
-        string oldSizeY = "";
+        Single oldSizeX;
+        Single oldSizeY;
+
+        byte[] pixelLookup = {255,254,253,252,251,250,249,248,247,246,245,244,243,242,241,240,239,238,237,236,235,234,233,232,231,230,229,228,227,226,225,224,223,222,221,220,219,218,217,216,215,214,213,212,211,210,209,208,207,206,205,204,203,202,201,200,199,198,197,196,195,194,193,192,191,190,189,188,187,186,185,184,183,182,181,180,179,178,177,176,175,174,173,172,171,170,169,168,167,166,165,164,163,162,161,160,159,158,157,156,155,154,153,152,151,150,149,148,147,146,145,144,143,142,141,140,139,138,137,136,135,134,133,132,131,130,129,128,127,126,125,124,123,122,121,120,119,118,117,116,115,114,113,112,111,110,109,108,107,106,105,104,103,102,101,100,99,98,97,96,95,94,93,92,91,90,89,88,87,86,85,84,83,82,81,80,79,78,77,76,75,74,73,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0};
 
         
 
@@ -89,12 +95,12 @@ namespace CNCControl
             );
             bCancel = true;
             bRunning = false;
-            cbDPI.SelectedIndex = 1;
             cbStepSize.SelectedIndex = 1;
-            cbMode.SelectedIndex = 0;
 
             cbScan.SelectedItem = "Horizontal";
             cbPowerDivisor.SelectedItem = "1";
+            DPI = (float)(1.00 / (Single.Parse(txtRes.Text)) * 25.4);
+            DPI_Laser = Single.Parse(txtRes.Text) / 10; // Pixel par cm
             txtDPI.Text = (1.00/(Single.Parse(txtRes.Text)) * 25.4).ToString("##0");
             groupNiveaux.Enabled = false;
             panelManipImage.Enabled = false;
@@ -1067,6 +1073,7 @@ namespace CNCControl
                     adjustedImage = new Bitmap(imageToPrint);
                     //imageToPrint = ResizeImage(imageToPrint,imageToPrint.Width,imageToPrint.Height);
                     getImageSize(imageToPrint);
+                    tabControl2.Enabled = true;
 
                     //Refresh();
                     //userAdjust();
@@ -1091,20 +1098,13 @@ namespace CNCControl
                 try
                 {
                     int DPI = Const.DefaultDPI;
-                    if (cbDPI.SelectedItem.ToString() != "")
-                    {
-                        DPI = int.Parse(cbDPI.SelectedItem.ToString());
-                    }
                     int feedRate = Const.DefaultFeedRate;
                     if (txtFeedRate.Text != "")
                     {
                         feedRate = int.Parse(txtFeedRate.Text);
                     }
                     int mode = Const.DefaultMode;
-                    if (cbMode.SelectedIndex == 1)
-                    {
-                        mode = 2;
-                    }                   
+             
                     temp = gCodeFromBitMap(adjustedImage,FeedRate:feedRate,DPI:DPI,Mode:mode);
                 }
                 catch (Exception ex)
@@ -1138,23 +1138,6 @@ namespace CNCControl
         private void txtMaxLaserTemp_TextChanged(object sender, EventArgs e)
         {
 
-        }
-
-        private void cbDPI_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (imageToPrint != null) {
-                setSizeOfImage();
-            }
-
-        }
-
-        private void setSizeOfImage()
-        {
-            double DPI = double.Parse(cbDPI.SelectedItem.ToString());
-            txtImgSizePixelX.Text = imageToPrint.Width.ToString();
-            txtImgSizePixelY.Text = imageToPrint.Height.ToString();
-            txtImgSizeX.Text = ((double)(imageToPrint.Width / DPI) * 2.54).ToString("0.0#"); //.ToString("0.###");
-            txtImgSizeY.Text = ((double)(imageToPrint.Height / DPI) * 2.54).ToString("0.0#"); //.ToString("0.###");
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)
@@ -1271,8 +1254,8 @@ namespace CNCControl
                 //Apply resize to original image
                 Int32 xSize;//Total X pixels of resulting image for GCode generation
                 Int32 ySize;//Total Y pixels of resulting image for GCode generation
-                //xSize = Convert.ToInt32(float.Parse(txtImgSizePixelX.Text, CultureInfo.InvariantCulture.NumberFormat) / float.Parse(txtRes.Text, CultureInfo.InvariantCulture.NumberFormat));
-                //ySize = Convert.ToInt32(float.Parse(txtImgSizePixelY.Text, CultureInfo.InvariantCulture.NumberFormat) / float.Parse(txtRes.Text, CultureInfo.InvariantCulture.NumberFormat));
+                xSize = Convert.ToInt32(float.Parse(txtImgSizePixelX.Text, CultureInfo.InvariantCulture.NumberFormat) / float.Parse(txtRes.Text, CultureInfo.InvariantCulture.NumberFormat));
+                ySize = Convert.ToInt32(float.Parse(txtImgSizePixelY.Text, CultureInfo.InvariantCulture.NumberFormat) / float.Parse(txtRes.Text, CultureInfo.InvariantCulture.NumberFormat));
                 //adjustedImage = imgResize(imageToPrint, xSize, ySize);
                 //Apply balance to adjusted (resized) image
                 adjustedImage = imgBalance(adjustedImage, tbBrightness.Value, tbContrast.Value, tbGamma.Value);
@@ -1322,7 +1305,7 @@ namespace CNCControl
             return (output);
         }
         //Return a grayscale version of an image
-        private Bitmap imgGrayscale(Bitmap original, int Mode)
+        private Bitmap imgGrayscale(Bitmap original, int mode)
         {
             lblImageAction.Text = "Grayscaling...";
             Refresh();
@@ -1330,56 +1313,65 @@ namespace CNCControl
             Graphics g = Graphics.FromImage(newBitmap);//get a graphics object from the new image
             //create the grayscale ColorMatrix
             ColorMatrix colorMatrix;
-            if (Mode == 0)      // automatique
+            switch(mode) 
             {
-                colorMatrix = new ColorMatrix(
-                            new float[][]  {
-                            new float[] {.299f, .299f, .299f, 0, 0},
-                            new float[] {.587f, .587f, .587f, 0, 0},
-                            new float[] {.114f, .114f, .114f, 0, 0},
-                            new float[] {0, 0, 0, 1, 0},
-                            new float[] {0, 0, 0, 0, 1}
-                        });
-                ImageAttributes attributes = new ImageAttributes();//create some image attributes
-                attributes.SetColorMatrix(colorMatrix);//set the color matrix attribute
+                case 0:
+                    colorMatrix = new ColorMatrix(
+                                new float[][]  {
+                                new float[] {.299f, .299f, .299f, 0, 0},
+                                new float[] {.587f, .587f, .587f, 0, 0},
+                                new float[] {.114f, .114f, .114f, 0, 0},
+                                new float[] {0, 0, 0, 1, 0},
+                                new float[] {0, 0, 0, 0, 1}
+                            });
+                    ImageAttributes attributes = new ImageAttributes();//create some image attributes
+                    attributes.SetColorMatrix(colorMatrix);//set the color matrix attribute
 
-                //draw the original image on the new image using the grayscale color matrix
-                g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
-                   0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
-                g.Dispose();//dispose the Graphics object
-            }
-            else
-            {
-                // copie le channel sélectionné 
-                Color theColor;
-                int channelValue;
-                newBitmap = new Bitmap(original);
-                for (int x = 0; x < original.Width; x++)
-                {
-                    for (int y = 0; y < original.Height; y++)
+                    //draw the original image on the new image using the grayscale color matrix
+                    g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
+                       0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+                    g.Dispose();//dispose the Graphics object
+                    break;
+                case 1: case 2: case 3: case 4: case 5: case 6:
+                    Color theColor;
+                    int channelValue;
+                    newBitmap = new Bitmap(original);
+                    for (int x = 0; x < original.Width; x++)
                     {
-                        theColor = original.GetPixel(x, y);
-                        switch (Mode) {
-                            case 1:
-                                channelValue = theColor.R;
-                                break;
-                            case 2:
-                                channelValue = theColor.G;
-                                break;
-                            case 3:
-                                channelValue = theColor.B;
-                                break;
-                            case 4:
-                                channelValue = theColor.A;
-                                break;
-                            default:
-                                channelValue = theColor.G;
-                                break;
+                        for (int y = 0; y < original.Height; y++)
+                        {
+                            theColor = original.GetPixel(x, y);
+                            switch (mode) {
+                                case 1:
+                                    channelValue = theColor.R;
+                                    break;
+                                case 2:
+                                    channelValue = theColor.G;
+                                    break;
+                                case 3:
+                                    channelValue = theColor.B;
+                                    break;
+                                case 4: // desaturation
+                                    channelValue =  (minRGB(theColor.R, theColor.G, theColor.B) +  maxRGB(theColor.R, theColor.G, theColor.B))/2;
+                                    break;
+                                case 5: // decomp min
+                                    channelValue = minRGB(theColor.R, theColor.G, theColor.B);
+                                    break;
+                                case 6: // decomp max
+                                    channelValue = maxRGB(theColor.R, theColor.G, theColor.B);
+                                    break;
+                                default:
+                                    channelValue = theColor.G;
+                                    break;
+                            }
+                            theColor = Color.FromArgb(channelValue,channelValue,channelValue);
+                            newBitmap.SetPixel(x,y,theColor);
                         }
-                        theColor = Color.FromArgb(channelValue,channelValue,channelValue);
-                        newBitmap.SetPixel(x,y,theColor);
                     }
-                }
+                    break;
+                default:
+                    break;
+
             }
 
             lblImageAction.Text = "Done";
@@ -1416,18 +1408,28 @@ namespace CNCControl
             return (newBitmap);
         }
 
-        //Resize image to desired width/height for gcode generation
-        private Bitmap imgResize(Bitmap input, Int32 xSize, Int32 ySize)
+        ////Resize image to desired width/height for gcode generation
+        //private Bitmap imgResize(Bitmap input, Int32 xSize, Int32 ySize)
+        //{
+        //    //Resize
+        //    Bitmap output;
+        //    lblImageAction.Text = "Resizing...";
+        //    Refresh();
+        //    output = new Bitmap(input, new Size(xSize, ySize));
+        //    lblImageAction.Text = "Done";
+        //    Refresh();
+        //    return (output);
+        //}
+
+        private void AdjustImageSize()
         {
-            //Resize
-            Bitmap output;
-            lblImageAction.Text = "Resizing...";
-            Refresh();
-            output = new Bitmap(input, new Size(xSize, ySize));
-            lblImageAction.Text = "Done";
-            Refresh();
-            return (output);
+            int xSize = Convert.ToInt32(Single.Parse(txtImgSizeX.Text) / DPI_Laser);
+            int ySize = Convert.ToInt32(Single.Parse(txtImgSizeY.Text) / DPI_Laser);
+            adjustedImage = ResizeImage(xSize, ySize);
+            getImageSize(adjustedImage);
         }
+
+
 
         //Apply dirthering to an image (Convert to 1 bit)
         private Bitmap imgDirther(Bitmap input)
@@ -1492,6 +1494,16 @@ namespace CNCControl
             return (r * 0.299 + g * 0.587 + b * 0.114) / 255;
         }
 
+        private byte maxRGB(byte red, byte green, byte blue)
+        {
+            return (Math.Max(red, Math.Max(green, blue)));
+        }
+
+        private byte minRGB(byte red, byte green, byte blue)
+        {
+            return (Math.Min(red, Math.Min(green, blue)));
+        }
+
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             pictureBox1.Image = new Bitmap(imageToPrint);
@@ -1506,6 +1518,7 @@ namespace CNCControl
         {
             adjustedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
             pictureBox1.Image = adjustedImage;
+            getImageSize(adjustedImage);
             Refresh();
         }
 
@@ -1513,6 +1526,7 @@ namespace CNCControl
         {
             adjustedImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
             pictureBox1.Image = adjustedImage;
+            getImageSize(adjustedImage);
             Refresh();
         }
 
@@ -1520,6 +1534,7 @@ namespace CNCControl
         {
             adjustedImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
             pictureBox1.Image = adjustedImage;
+            getImageSize(adjustedImage);
             Refresh();
         }
 
@@ -1527,6 +1542,7 @@ namespace CNCControl
         {
             adjustedImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
             pictureBox1.Image = adjustedImage;
+            getImageSize(adjustedImage);
             Refresh();
         }
 
@@ -1535,27 +1551,6 @@ namespace CNCControl
             adjustedImage = imgInvert(adjustedImage);
             pictureBox1.Image = adjustedImage;
             Refresh();
-        }
-
-        private void cbRender_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (adjustedImage == null) return;
-            if (cbRender.SelectedIndex == 1)
-            {
-                lblImageAction.Text = "Dirtering...";
-                adjustedImage = imgDirther(adjustedImage);
-                pictureBox1.Image = adjustedImage;
-                lblImageAction.Text = "Done";
-                Refresh();
-            }
-            else if(cbRender.SelectedIndex == 0)
-            {
-                lblImageAction.Text = "Gray scale...";
-                adjustedImage = imgGrayscale(adjustedImage,0);
-                lblImageAction.Text = "Done";
-                Refresh();
-                userAdjust();
-            }
         }
 
         private void button21_Click(object sender, EventArgs e)
@@ -1645,22 +1640,27 @@ namespace CNCControl
             Single YY;
             X = image.Width;
             Y = image.Height;
-            XX = (X / Single.Parse(txtDPI.Text)) * (Single)2.54;
-            YY = (Y / Single.Parse(txtDPI.Text)) * (Single)2.54;
+            XX = (X / DPI) * (Single)2.54;
+            YY = (Y / DPI) * (Single)2.54;
+            ratio = X / Y;
             txtImgSizePixelX.Text = X.ToString();
             txtImgSizePixelY.Text = Y.ToString();
             txtImgSizeX.Text = XX.ToString();
             txtImgSizeY.Text = YY.ToString();
+            txtRatio.Text = ratio.ToString("##0.0");
         }
 
         private void txtImgSizeX_Enter(object sender, EventArgs e)
         {
-            oldSizeX = txtImgSizeX.Text;
+            oldSizeX = Single.Parse(txtImgSizeX.Text);
+            reload = false;
         }
 
         private void txtImgSizeY_Enter(object sender, EventArgs e)
         {
-            oldSizeY = txtImgSizeY.Text;
+
+            oldSizeY = Single.Parse(txtImgSizeY.Text);
+            reload = false;
         }
 
 
@@ -1673,15 +1673,17 @@ namespace CNCControl
                 return;
             }
 
+            if (e.KeyChar == Convert.ToChar(27))
+            {
+                txtImgSizeX.Text = oldSizeX.ToString("##0.00");
+            }
+            
             if (e.KeyChar == Convert.ToChar(13))
             {
                 widthChangedCheck();
             }
 
-            if (e.KeyChar == Convert.ToChar(27))
-            {
-                txtImgSizeX.Text = oldSizeX;
-            }
+
         }
 
         private void txtImgSizeY_KeyPress(object sender, KeyPressEventArgs e)
@@ -1692,63 +1694,74 @@ namespace CNCControl
                 e.Handled = true;//Stop the character from being entered into the control since it is non-numerical.
                 return;
             }
-
+            if (e.KeyChar == Convert.ToChar(27))
+            {
+                txtImgSizeY.Text = oldSizeY.ToString("##0.00");
+            }
             if (e.KeyChar == Convert.ToChar(13))
             {
                 widthChangedCheck();
             }
         }
 
-
         //Check if a new image width has been confirmad by user, process it.
         private void widthChangedCheck()
         {
-            //try
-            //{
-            //    if (adjustedImage == null) return;//if no image, do nothing
-            //    float newValue = Convert.ToSingle(tbWidth.Text, CultureInfo.InvariantCulture.NumberFormat);//Get the user input value           
-            //    if (newValue == lastValue) return;//if not is a new value do nothing     
-            //    lastValue = Convert.ToSingle(tbWidth.Text, CultureInfo.InvariantCulture.NumberFormat);
-            //    if (cbLockRatio.Checked)
-            //    {
-            //        tbHeight.Text = Convert.ToString((newValue / ratio), CultureInfo.InvariantCulture.NumberFormat);
-            //    }
-            //    userAdjust();
-            //}
-            //catch
-            //{
-            //    MessageBox.Show("Check width value.", "Invalid value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+            try
+            {
+                if (adjustedImage == null) return;//if no image, do nothing
+                float newValue = Single.Parse(txtImgSizeX.Text);//Get the user input value           
+                if (newValue == oldSizeX) return;//if not is a new value do nothing     
+                //lastValue = Single.Parse(txtImgSizeX.Text);
+                if (cbRatio.Checked)
+                {
+                    txtImgSizeY.Text = (newValue / ratio).ToString("##0.00");
+                }
+                txtImgSizeX.Text = newValue.ToString("##0.00");
+
+            }
+            catch
+            {
+                MessageBox.Show("Check width value.", "Invalid value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
         //Check if a new image height has been confirmad by user, process it.
         private void heightChangedCheck()
         {
-            //try
-            //{
-            //    if (adjustedImage == null) return;//if no image, do nothing
-            //    float newValue = Convert.ToSingle(tbHeight.Text, CultureInfo.InvariantCulture.NumberFormat);//Get the user input value   
-            //    if (newValue == lastValue) return;//if not is a new value do nothing
-            //    lastValue = Convert.ToSingle(tbHeight.Text, CultureInfo.InvariantCulture.NumberFormat);
-            //    if (cbLockRatio.Checked)
-            //    {
-            //        tbWidth.Text = Convert.ToString((newValue * ratio), CultureInfo.InvariantCulture.NumberFormat);
-            //    }
-            //    userAdjust();
-            //}
-            //catch
-            //{
-            //    MessageBox.Show("Check height value.", "Invalid value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+            try
+            {
+                if (adjustedImage == null) return;//if no image, do nothing
+                float newValue = Single.Parse(txtImgSizeY.Text);//Get the user input value   
+                if (newValue == oldSizeY) return;//if not is a new value do nothing
+                //lastValue = Convert.ToSingle(txtImgSizeY.Text, CultureInfo.InvariantCulture.NumberFormat);
+                if (cbRatio.Checked)
+                {
+                    txtImgSizeX.Text = (newValue * ratio).ToString("##0.00");
+                }
+                txtImgSizeY.Text = newValue.ToString("##0.00");
+
+            }
+            catch
+            {
+                MessageBox.Show("Check height value.", "Invalid value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void txtImgSizeX_Leave(object sender, EventArgs e)
         {
-            widthChangedCheck();
+                widthChangedCheck();
+                AdjustImageSize();
+                pictureBox1.Image = adjustedImage;
+
+
         }
 
         private void txtImgSizeY_Leave(object sender, EventArgs e)
         {
-            heightChangedCheck();
+                heightChangedCheck();
+                AdjustImageSize();
+                pictureBox1.Image = adjustedImage;
         }
 
         private void button26_Click(object sender, EventArgs e)
@@ -1782,6 +1795,7 @@ namespace CNCControl
 
         private void button24_Click(object sender, EventArgs e)
         {
+            reload = true;
             adjustedImage = null;
             tbBrightness.Value = 0;
             tbContrast.Value = 0;
@@ -1796,12 +1810,7 @@ namespace CNCControl
             pictureBox1.Image = OriginalImage;
         }
 
-        private void cbCanal_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (rbNiveaux.Checked == false) return;
-            if (adjustedImage == null) return;
-            pictureBox1.Image = imgGrayscale(adjustedImage, cbCanal.SelectedIndex);            
-        }
+
 
         private void button28_Click(object sender, EventArgs e)
         {
@@ -1815,11 +1824,64 @@ namespace CNCControl
         {
             if (rbNiveaux.Checked == true)
             {
-                pictureBox1.Image = imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
+                adjustedImage = imageToPrint;
+                AdjustImageSize();
+                adjustedImage = imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
+                pictureBox1.Image = adjustedImage;
             }
         }
 
+        private void cbCanal_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (rbNiveaux.Checked == false) return;
+            adjustedImage = imageToPrint;
+            AdjustImageSize();
+            adjustedImage = imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
+            pictureBox1.Image = adjustedImage;
+        }
 
+        /// <summary>
+        /// Resize the image to the specified width and height.
+        /// </summary>
+        /// <param name="image">The image to resize.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <returns>The resized image.</returns>
+        public Bitmap ResizeImage(int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            var resolution = DPI;
+            destImage.SetResolution(resolution, resolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(adjustedImage, destRect, 0, 0, adjustedImage.Width, adjustedImage.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
+
+        private void button31_Click(object sender, EventArgs e)
+        {
+            tbMatrice.Text = "byte pixelLookup[] = (";
+            for (int x = 0; x < 255; x++)
+            {
+                tbMatrice.Text += (255 - x).ToString() + ",";
+            }
+            tbMatrice.Text += ");";
+        }
 
 
     }

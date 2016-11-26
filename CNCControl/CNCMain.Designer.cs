@@ -68,7 +68,10 @@
             this.button24 = new System.Windows.Forms.Button();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.txtRatio = new System.Windows.Forms.TextBox();
             this.groupConvert = new System.Windows.Forms.GroupBox();
+            this.label19 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.button28 = new System.Windows.Forms.Button();
             this.button27 = new System.Windows.Forms.Button();
             this.cbCanal = new System.Windows.Forms.ComboBox();
@@ -84,7 +87,7 @@
             this.button22 = new System.Windows.Forms.Button();
             this.button23 = new System.Windows.Forms.Button();
             this.button25 = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.cbRatio = new System.Windows.Forms.CheckBox();
             this.label18 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
@@ -100,6 +103,8 @@
             this.label12 = new System.Windows.Forms.Label();
             this.txtRes = new System.Windows.Forms.TextBox();
             this.groupNiveaux = new System.Windows.Forms.GroupBox();
+            this.button30 = new System.Windows.Forms.Button();
+            this.button29 = new System.Windows.Forms.Button();
             this.lblBrightness = new System.Windows.Forms.Label();
             this.lblContrast = new System.Windows.Forms.Label();
             this.lblGamma = new System.Windows.Forms.Label();
@@ -110,7 +115,6 @@
             this.tbGamma = new System.Windows.Forms.TrackBar();
             this.tbContrast = new System.Windows.Forms.TrackBar();
             this.txtGCodePreview = new System.Windows.Forms.TextBox();
-            this.cbRender = new System.Windows.Forms.ComboBox();
             this.button17 = new System.Windows.Forms.Button();
             this.button18 = new System.Windows.Forms.Button();
             this.txtImgSizeY = new System.Windows.Forms.TextBox();
@@ -120,8 +124,6 @@
             this.txtImgSizePixelY = new System.Windows.Forms.TextBox();
             this.txtImgSizePixelX = new System.Windows.Forms.TextBox();
             this.txtFeedRate = new System.Windows.Forms.TextBox();
-            this.cbMode = new System.Windows.Forms.ComboBox();
-            this.cbDPI = new System.Windows.Forms.ComboBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.lblImageAction = new System.Windows.Forms.Label();
@@ -139,6 +141,7 @@
             this.tpFile = new System.Windows.Forms.TabPage();
             this.tpSetting = new System.Windows.Forms.TabPage();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button31 = new System.Windows.Forms.Button();
             this.button21 = new System.Windows.Forms.Button();
             this.tbMatrice = new System.Windows.Forms.TextBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -232,7 +235,7 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(926, 3);
+            this.groupBox1.Location = new System.Drawing.Point(898, 3);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(223, 396);
             this.groupBox1.TabIndex = 25;
@@ -318,7 +321,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(0, 826);
             this.statusStrip1.Margin = new System.Windows.Forms.Padding(0, 3, 0, 2);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1141, 35);
+            this.statusStrip1.Size = new System.Drawing.Size(1543, 35);
             this.statusStrip1.TabIndex = 33;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -358,7 +361,7 @@
             this.toolStripButton4});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1141, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1543, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -514,7 +517,7 @@
             this.tabControl1.Location = new System.Drawing.Point(10, 37);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1132, 783);
+            this.tabControl1.Size = new System.Drawing.Size(1149, 783);
             this.tabControl1.TabIndex = 48;
             // 
             // tpImage
@@ -527,7 +530,7 @@
             this.tpImage.Location = new System.Drawing.Point(4, 22);
             this.tpImage.Name = "tpImage";
             this.tpImage.Padding = new System.Windows.Forms.Padding(3);
-            this.tpImage.Size = new System.Drawing.Size(1124, 757);
+            this.tpImage.Size = new System.Drawing.Size(1141, 757);
             this.tpImage.TabIndex = 1;
             this.tpImage.Text = "Image";
             this.tpImage.UseVisualStyleBackColor = true;
@@ -547,17 +550,19 @@
             this.tabControl2.Controls.Add(this.tabPage2);
             this.tabControl2.Controls.Add(this.tabPage3);
             this.tabControl2.Controls.Add(this.tabPage4);
+            this.tabControl2.Enabled = false;
             this.tabControl2.Location = new System.Drawing.Point(762, 6);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(360, 745);
+            this.tabControl2.Size = new System.Drawing.Size(373, 745);
             this.tabControl2.TabIndex = 26;
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.txtRatio);
             this.tabPage2.Controls.Add(this.groupConvert);
             this.tabPage2.Controls.Add(this.panelManipImage);
-            this.tabPage2.Controls.Add(this.checkBox1);
+            this.tabPage2.Controls.Add(this.cbRatio);
             this.tabPage2.Controls.Add(this.label18);
             this.tabPage2.Controls.Add(this.label17);
             this.tabPage2.Controls.Add(this.label16);
@@ -567,7 +572,6 @@
             this.tabPage2.Controls.Add(this.groupBox3);
             this.tabPage2.Controls.Add(this.groupNiveaux);
             this.tabPage2.Controls.Add(this.txtGCodePreview);
-            this.tabPage2.Controls.Add(this.cbRender);
             this.tabPage2.Controls.Add(this.button17);
             this.tabPage2.Controls.Add(this.button18);
             this.tabPage2.Controls.Add(this.txtImgSizeY);
@@ -577,18 +581,26 @@
             this.tabPage2.Controls.Add(this.txtImgSizePixelY);
             this.tabPage2.Controls.Add(this.txtImgSizePixelX);
             this.tabPage2.Controls.Add(this.txtFeedRate);
-            this.tabPage2.Controls.Add(this.cbMode);
-            this.tabPage2.Controls.Add(this.cbDPI);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(352, 719);
+            this.tabPage2.Size = new System.Drawing.Size(365, 719);
             this.tabPage2.TabIndex = 0;
             this.tabPage2.Text = "Image";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // txtRatio
+            // 
+            this.txtRatio.Enabled = false;
+            this.txtRatio.Location = new System.Drawing.Point(89, 505);
+            this.txtRatio.Name = "txtRatio";
+            this.txtRatio.Size = new System.Drawing.Size(59, 20);
+            this.txtRatio.TabIndex = 41;
+            // 
             // groupConvert
             // 
+            this.groupConvert.Controls.Add(this.label19);
+            this.groupConvert.Controls.Add(this.textBox1);
             this.groupConvert.Controls.Add(this.button28);
             this.groupConvert.Controls.Add(this.button27);
             this.groupConvert.Controls.Add(this.cbCanal);
@@ -596,14 +608,32 @@
             this.groupConvert.Controls.Add(this.rbNiveaux);
             this.groupConvert.Location = new System.Drawing.Point(6, 6);
             this.groupConvert.Name = "groupConvert";
-            this.groupConvert.Size = new System.Drawing.Size(340, 98);
+            this.groupConvert.Size = new System.Drawing.Size(342, 98);
             this.groupConvert.TabIndex = 40;
             this.groupConvert.TabStop = false;
             this.groupConvert.Text = "Conversion";
             // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(111, 45);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(30, 13);
+            this.label19.TabIndex = 6;
+            this.label19.Text = "Seuil";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(144, 42);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(91, 20);
+            this.textBox1.TabIndex = 5;
+            this.textBox1.Text = "127";
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
             // button28
             // 
-            this.button28.Location = new System.Drawing.Point(89, 69);
+            this.button28.Location = new System.Drawing.Point(261, 69);
             this.button28.Name = "button28";
             this.button28.Size = new System.Drawing.Size(75, 23);
             this.button28.TabIndex = 4;
@@ -613,7 +643,7 @@
             // 
             // button27
             // 
-            this.button27.Location = new System.Drawing.Point(8, 69);
+            this.button27.Location = new System.Drawing.Point(180, 69);
             this.button27.Name = "button27";
             this.button27.Size = new System.Drawing.Size(75, 23);
             this.button27.TabIndex = 3;
@@ -628,7 +658,9 @@
             "Rouge",
             "Vert",
             "Bleu",
-            "Luminance"});
+            "Desaturation",
+            "Decomp (min)",
+            "Decomp (max)"});
             this.cbCanal.Location = new System.Drawing.Point(114, 19);
             this.cbCanal.Name = "cbCanal";
             this.cbCanal.Size = new System.Drawing.Size(121, 21);
@@ -776,22 +808,22 @@
             this.toolTip1.SetToolTip(this.button25, "Compare derniere action");
             this.button25.UseVisualStyleBackColor = true;
             // 
-            // checkBox1
+            // cbRatio
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(12, 505);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(82, 17);
-            this.checkBox1.TabIndex = 37;
-            this.checkBox1.Text = "Aspect ratio";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.cbRatio.AutoSize = true;
+            this.cbRatio.Checked = true;
+            this.cbRatio.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbRatio.Location = new System.Drawing.Point(6, 509);
+            this.cbRatio.Name = "cbRatio";
+            this.cbRatio.Size = new System.Drawing.Size(82, 17);
+            this.cbRatio.TabIndex = 37;
+            this.cbRatio.Text = "Aspect ratio";
+            this.cbRatio.UseVisualStyleBackColor = true;
             // 
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(76, 487);
+            this.label18.Location = new System.Drawing.Point(71, 487);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(12, 13);
             this.label18.TabIndex = 36;
@@ -800,7 +832,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(76, 460);
+            this.label17.Location = new System.Drawing.Point(71, 460);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(12, 13);
             this.label17.TabIndex = 35;
@@ -826,7 +858,8 @@
             // 
             // txtDPI
             // 
-            this.txtDPI.Location = new System.Drawing.Point(282, 427);
+            this.txtDPI.Enabled = false;
+            this.txtDPI.Location = new System.Drawing.Point(209, 427);
             this.txtDPI.Name = "txtDPI";
             this.txtDPI.Size = new System.Drawing.Size(46, 20);
             this.txtDPI.TabIndex = 32;
@@ -935,6 +968,8 @@
             // 
             // groupNiveaux
             // 
+            this.groupNiveaux.Controls.Add(this.button30);
+            this.groupNiveaux.Controls.Add(this.button29);
             this.groupNiveaux.Controls.Add(this.lblBrightness);
             this.groupNiveaux.Controls.Add(this.lblContrast);
             this.groupNiveaux.Controls.Add(this.lblGamma);
@@ -946,9 +981,27 @@
             this.groupNiveaux.Controls.Add(this.tbContrast);
             this.groupNiveaux.Location = new System.Drawing.Point(6, 158);
             this.groupNiveaux.Name = "groupNiveaux";
-            this.groupNiveaux.Size = new System.Drawing.Size(342, 220);
+            this.groupNiveaux.Size = new System.Drawing.Size(342, 247);
             this.groupNiveaux.TabIndex = 15;
             this.groupNiveaux.TabStop = false;
+            // 
+            // button30
+            // 
+            this.button30.Location = new System.Drawing.Point(178, 218);
+            this.button30.Name = "button30";
+            this.button30.Size = new System.Drawing.Size(75, 23);
+            this.button30.TabIndex = 10;
+            this.button30.Text = "OK";
+            this.button30.UseVisualStyleBackColor = true;
+            // 
+            // button29
+            // 
+            this.button29.Location = new System.Drawing.Point(260, 218);
+            this.button29.Name = "button29";
+            this.button29.Size = new System.Drawing.Size(75, 23);
+            this.button29.TabIndex = 9;
+            this.button29.Text = "Annuler";
+            this.button29.UseVisualStyleBackColor = true;
             // 
             // lblBrightness
             // 
@@ -1063,18 +1116,6 @@
             this.txtGCodePreview.TabIndex = 28;
             this.txtGCodePreview.Visible = false;
             // 
-            // cbRender
-            // 
-            this.cbRender.FormattingEnabled = true;
-            this.cbRender.Items.AddRange(new object[] {
-            "Grayscale",
-            "Dithering"});
-            this.cbRender.Location = new System.Drawing.Point(9, 426);
-            this.cbRender.Name = "cbRender";
-            this.cbRender.Size = new System.Drawing.Size(121, 21);
-            this.cbRender.TabIndex = 24;
-            this.cbRender.SelectedIndexChanged += new System.EventHandler(this.cbRender_SelectedIndexChanged);
-            // 
             // button17
             // 
             this.button17.Location = new System.Drawing.Point(4, 690);
@@ -1096,7 +1137,7 @@
             // 
             // txtImgSizeY
             // 
-            this.txtImgSizeY.Location = new System.Drawing.Point(94, 480);
+            this.txtImgSizeY.Location = new System.Drawing.Point(89, 479);
             this.txtImgSizeY.Name = "txtImgSizeY";
             this.txtImgSizeY.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizeY.TabIndex = 10;
@@ -1116,7 +1157,7 @@
             // 
             // txtImgSizeX
             // 
-            this.txtImgSizeX.Location = new System.Drawing.Point(11, 479);
+            this.txtImgSizeX.Location = new System.Drawing.Point(6, 479);
             this.txtImgSizeX.Name = "txtImgSizeX";
             this.txtImgSizeX.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizeX.TabIndex = 9;
@@ -1136,7 +1177,8 @@
             // 
             // txtImgSizePixelY
             // 
-            this.txtImgSizePixelY.Location = new System.Drawing.Point(94, 453);
+            this.txtImgSizePixelY.Enabled = false;
+            this.txtImgSizePixelY.Location = new System.Drawing.Point(89, 453);
             this.txtImgSizePixelY.Name = "txtImgSizePixelY";
             this.txtImgSizePixelY.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizePixelY.TabIndex = 8;
@@ -1144,7 +1186,8 @@
             // 
             // txtImgSizePixelX
             // 
-            this.txtImgSizePixelX.Location = new System.Drawing.Point(11, 453);
+            this.txtImgSizePixelX.Enabled = false;
+            this.txtImgSizePixelX.Location = new System.Drawing.Point(6, 453);
             this.txtImgSizePixelX.Name = "txtImgSizePixelX";
             this.txtImgSizePixelX.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizePixelX.TabIndex = 7;
@@ -1159,38 +1202,12 @@
             this.txtFeedRate.Text = "2500";
             this.txtFeedRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
-            // cbMode
-            // 
-            this.cbMode.FormattingEnabled = true;
-            this.cbMode.Items.AddRange(new object[] {
-            "Mode 1",
-            "Mode 2"});
-            this.cbMode.Location = new System.Drawing.Point(204, 448);
-            this.cbMode.Name = "cbMode";
-            this.cbMode.Size = new System.Drawing.Size(124, 21);
-            this.cbMode.TabIndex = 12;
-            this.cbMode.Text = "Mode 1";
-            // 
-            // cbDPI
-            // 
-            this.cbDPI.FormattingEnabled = true;
-            this.cbDPI.Items.AddRange(new object[] {
-            "72",
-            "150",
-            "300"});
-            this.cbDPI.Location = new System.Drawing.Point(205, 427);
-            this.cbDPI.Name = "cbDPI";
-            this.cbDPI.Size = new System.Drawing.Size(46, 21);
-            this.cbDPI.TabIndex = 5;
-            this.cbDPI.Text = "150";
-            this.cbDPI.SelectedIndexChanged += new System.EventHandler(this.cbDPI_SelectedIndexChanged);
-            // 
             // tabPage3
             // 
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(352, 719);
+            this.tabPage3.Size = new System.Drawing.Size(365, 719);
             this.tabPage3.TabIndex = 1;
             this.tabPage3.Text = "Laser";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -1199,7 +1216,7 @@
             // 
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(352, 719);
+            this.tabPage4.Size = new System.Drawing.Size(365, 719);
             this.tabPage4.TabIndex = 2;
             this.tabPage4.Text = "Gcode";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -1250,7 +1267,7 @@
             this.tpInterface.Controls.Add(this.button14);
             this.tpInterface.Location = new System.Drawing.Point(4, 22);
             this.tpInterface.Name = "tpInterface";
-            this.tpInterface.Size = new System.Drawing.Size(1152, 757);
+            this.tpInterface.Size = new System.Drawing.Size(1141, 757);
             this.tpInterface.TabIndex = 4;
             this.tpInterface.Text = "Interface";
             this.tpInterface.UseVisualStyleBackColor = true;
@@ -1311,7 +1328,7 @@
             this.button3.BackColor = System.Drawing.Color.Red;
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button3.ForeColor = System.Drawing.Color.Yellow;
-            this.button3.Location = new System.Drawing.Point(966, 402);
+            this.button3.Location = new System.Drawing.Point(898, 405);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(183, 71);
             this.button3.TabIndex = 51;
@@ -1333,7 +1350,7 @@
             this.fpJog.Location = new System.Drawing.Point(4, 22);
             this.fpJog.Name = "fpJog";
             this.fpJog.Padding = new System.Windows.Forms.Padding(3);
-            this.fpJog.Size = new System.Drawing.Size(1152, 757);
+            this.fpJog.Size = new System.Drawing.Size(1141, 757);
             this.fpJog.TabIndex = 0;
             this.fpJog.Text = "Jog Control";
             this.fpJog.UseVisualStyleBackColor = true;
@@ -1365,7 +1382,7 @@
             this.tpFile.Location = new System.Drawing.Point(4, 22);
             this.tpFile.Name = "tpFile";
             this.tpFile.Padding = new System.Windows.Forms.Padding(3);
-            this.tpFile.Size = new System.Drawing.Size(1152, 757);
+            this.tpFile.Size = new System.Drawing.Size(1141, 757);
             this.tpFile.TabIndex = 2;
             this.tpFile.Text = "File to print";
             this.tpFile.UseVisualStyleBackColor = true;
@@ -1374,22 +1391,33 @@
             // 
             this.tpSetting.Location = new System.Drawing.Point(4, 22);
             this.tpSetting.Name = "tpSetting";
-            this.tpSetting.Size = new System.Drawing.Size(1152, 757);
+            this.tpSetting.Size = new System.Drawing.Size(1141, 757);
             this.tpSetting.TabIndex = 3;
             this.tpSetting.Text = "Setting";
             this.tpSetting.UseVisualStyleBackColor = true;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.button31);
             this.tabPage1.Controls.Add(this.button21);
             this.tabPage1.Controls.Add(this.tbMatrice);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1152, 757);
+            this.tabPage1.Size = new System.Drawing.Size(1141, 757);
             this.tabPage1.TabIndex = 5;
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button31
+            // 
+            this.button31.Location = new System.Drawing.Point(821, 53);
+            this.button31.Name = "button31";
+            this.button31.Size = new System.Drawing.Size(75, 23);
+            this.button31.TabIndex = 2;
+            this.button31.Text = "button31";
+            this.button31.UseVisualStyleBackColor = true;
+            this.button31.Click += new System.EventHandler(this.button31_Click);
             // 
             // button21
             // 
@@ -1430,7 +1458,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1141, 861);
+            this.ClientSize = new System.Drawing.Size(1543, 861);
             this.Controls.Add(this.pgBar);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
@@ -1511,7 +1539,6 @@
         private System.Windows.Forms.TabPage fpJog;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.ComboBox cbDPI;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox cbStepSize;
         private System.Windows.Forms.TextBox txtImgSizePixelY;
@@ -1519,7 +1546,6 @@
         private System.Windows.Forms.TextBox txtImgSizeY;
         private System.Windows.Forms.TextBox txtImgSizeX;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.ComboBox cbMode;
         private System.Windows.Forms.TextBox txtFeedRate;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ProgressBar pgBar;
@@ -1551,7 +1577,6 @@
         private System.Windows.Forms.Button button12;
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.ComboBox cbRender;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Button button21;
         private System.Windows.Forms.TextBox tbMatrice;
@@ -1578,7 +1603,7 @@
         private System.Windows.Forms.TextBox txtDPI;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox cbRatio;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Button button26;
@@ -1589,6 +1614,12 @@
         private System.Windows.Forms.ComboBox cbCanal;
         private System.Windows.Forms.RadioButton rbDithering;
         private System.Windows.Forms.RadioButton rbNiveaux;
+        private System.Windows.Forms.Button button30;
+        private System.Windows.Forms.Button button29;
+        private System.Windows.Forms.TextBox txtRatio;
+        private System.Windows.Forms.Button button31;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 
