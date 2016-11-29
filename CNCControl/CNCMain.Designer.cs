@@ -68,6 +68,8 @@
             this.button24 = new System.Windows.Forms.Button();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button33 = new System.Windows.Forms.Button();
+            this.button32 = new System.Windows.Forms.Button();
             this.txtRatio = new System.Windows.Forms.TextBox();
             this.groupConvert = new System.Windows.Forms.GroupBox();
             this.label19 = new System.Windows.Forms.Label();
@@ -147,6 +149,7 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pgBar = new System.Windows.Forms.ProgressBar();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.button34 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -522,6 +525,7 @@
             // 
             // tpImage
             // 
+            this.tpImage.Controls.Add(this.button34);
             this.tpImage.Controls.Add(this.button24);
             this.tpImage.Controls.Add(this.tabControl2);
             this.tpImage.Controls.Add(this.lblImageAction);
@@ -559,6 +563,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.button33);
+            this.tabPage2.Controls.Add(this.button32);
             this.tabPage2.Controls.Add(this.txtRatio);
             this.tabPage2.Controls.Add(this.groupConvert);
             this.tabPage2.Controls.Add(this.panelManipImage);
@@ -588,6 +594,26 @@
             this.tabPage2.TabIndex = 0;
             this.tabPage2.Text = "Image";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // button33
+            // 
+            this.button33.Location = new System.Drawing.Point(267, 505);
+            this.button33.Name = "button33";
+            this.button33.Size = new System.Drawing.Size(75, 23);
+            this.button33.TabIndex = 43;
+            this.button33.Text = "Annuler";
+            this.button33.UseVisualStyleBackColor = true;
+            this.button33.Click += new System.EventHandler(this.button33_Click);
+            // 
+            // button32
+            // 
+            this.button32.Location = new System.Drawing.Point(186, 505);
+            this.button32.Name = "button32";
+            this.button32.Size = new System.Drawing.Size(75, 23);
+            this.button32.TabIndex = 42;
+            this.button32.Text = "OK";
+            this.button32.UseVisualStyleBackColor = true;
+            this.button32.Click += new System.EventHandler(this.button32_Click);
             // 
             // txtRatio
             // 
@@ -649,12 +675,13 @@
             this.button27.TabIndex = 3;
             this.button27.Text = "OK";
             this.button27.UseVisualStyleBackColor = true;
+            this.button27.Click += new System.EventHandler(this.button27_Click);
             // 
             // cbCanal
             // 
             this.cbCanal.FormattingEnabled = true;
             this.cbCanal.Items.AddRange(new object[] {
-            "Automatique",
+            "Select Mode...",
             "Rouge",
             "Vert",
             "Bleu",
@@ -993,6 +1020,7 @@
             this.button30.TabIndex = 10;
             this.button30.Text = "OK";
             this.button30.UseVisualStyleBackColor = true;
+            this.button30.Click += new System.EventHandler(this.button30_Click);
             // 
             // button29
             // 
@@ -1002,6 +1030,7 @@
             this.button29.TabIndex = 9;
             this.button29.Text = "Annuler";
             this.button29.UseVisualStyleBackColor = true;
+            this.button29.Click += new System.EventHandler(this.button29_Click);
             // 
             // lblBrightness
             // 
@@ -1142,9 +1171,7 @@
             this.txtImgSizeY.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizeY.TabIndex = 10;
             this.txtImgSizeY.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.txtImgSizeY.Enter += new System.EventHandler(this.txtImgSizeY_Enter);
             this.txtImgSizeY.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtImgSizeY_KeyPress);
-            this.txtImgSizeY.Leave += new System.EventHandler(this.txtImgSizeY_Leave);
             // 
             // label5
             // 
@@ -1162,14 +1189,12 @@
             this.txtImgSizeX.Size = new System.Drawing.Size(59, 20);
             this.txtImgSizeX.TabIndex = 9;
             this.txtImgSizeX.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.txtImgSizeX.Enter += new System.EventHandler(this.txtImgSizeX_Enter);
             this.txtImgSizeX.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtImgSizeX_KeyPress);
-            this.txtImgSizeX.Leave += new System.EventHandler(this.txtImgSizeX_Leave);
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(202, 472);
+            this.label6.Location = new System.Drawing.Point(216, 460);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(49, 13);
             this.label6.TabIndex = 14;
@@ -1195,7 +1220,7 @@
             // 
             // txtFeedRate
             // 
-            this.txtFeedRate.Location = new System.Drawing.Point(205, 488);
+            this.txtFeedRate.Location = new System.Drawing.Point(218, 476);
             this.txtFeedRate.Name = "txtFeedRate";
             this.txtFeedRate.Size = new System.Drawing.Size(123, 20);
             this.txtFeedRate.TabIndex = 13;
@@ -1233,7 +1258,7 @@
             // pictureBox1
             // 
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureBox1.Location = new System.Drawing.Point(6, 31);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(750, 750);
@@ -1453,6 +1478,16 @@
             this.pgBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.pgBar.TabIndex = 50;
             // 
+            // button34
+            // 
+            this.button34.Location = new System.Drawing.Point(491, 6);
+            this.button34.Name = "button34";
+            this.button34.Size = new System.Drawing.Size(140, 23);
+            this.button34.TabIndex = 28;
+            this.button34.Text = "create image";
+            this.button34.UseVisualStyleBackColor = true;
+            this.button34.Click += new System.EventHandler(this.button34_Click);
+            // 
             // CNCMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1620,6 +1655,9 @@
         private System.Windows.Forms.Button button31;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button button33;
+        private System.Windows.Forms.Button button32;
+        private System.Windows.Forms.Button button34;
     }
 }
 

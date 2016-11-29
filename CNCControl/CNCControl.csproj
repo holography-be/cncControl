@@ -53,6 +53,8 @@
     </Compile>
     <Compile Include="clsSerial.cs" />
     <Compile Include="Const.cs" />
+    <Compile Include="GrayScaleBitmap.cs" />
+    <Compile Include="LockBitmap.cs" />
     <Compile Include="frmEEPROM.cs">
       <SubType>Form</SubType>
     </Compile>

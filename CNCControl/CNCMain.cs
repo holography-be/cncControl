@@ -845,7 +845,7 @@ namespace CNCControl
                         else
                         {
                             incX = -1;
-                            col = pixelUtil[line][1];   // dernier pixel mais on va de droite à gauche
+                            col = pixelUtil[line][1];   // dernier pixel car on va de droite à gauche
                             endX = pixelUtil[line][0];  // 1er pixel
                             coordX = (float)(col + 1) * resolution;
                         }
@@ -1305,78 +1305,46 @@ namespace CNCControl
             return (output);
         }
         //Return a grayscale version of an image
-        private Bitmap imgGrayscale(Bitmap original, int mode)
+        private void imgGrayscale(Bitmap original, int mode)
         {
             lblImageAction.Text = "Grayscaling...";
             Refresh();
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height);//create a blank bitmap the same size as original
-            Graphics g = Graphics.FromImage(newBitmap);//get a graphics object from the new image
-            //create the grayscale ColorMatrix
-            ColorMatrix colorMatrix;
+            Bitmap newBitmap;
+            PixelFormat pf = PixelFormat.Format32bppArgb;
             switch(mode) 
             {
                 case 0:
-                    colorMatrix = new ColorMatrix(
-                                new float[][]  {
-                                new float[] {.299f, .299f, .299f, 0, 0},
-                                new float[] {.587f, .587f, .587f, 0, 0},
-                                new float[] {.114f, .114f, .114f, 0, 0},
-                                new float[] {0, 0, 0, 1, 0},
-                                new float[] {0, 0, 0, 0, 1}
-                            });
-                    ImageAttributes attributes = new ImageAttributes();//create some image attributes
-                    attributes.SetColorMatrix(colorMatrix);//set the color matrix attribute
-
-                    //draw the original image on the new image using the grayscale color matrix
-                    g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
-                       0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
-                    g.Dispose();//dispose the Graphics object
+//                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.AUTOMATIC);
+////                    adjustedImage = newBitmap;
+                    newBitmap = original;
                     break;
-                case 1: case 2: case 3: case 4: case 5: case 6:
-                    Color theColor;
-                    int channelValue;
-                    newBitmap = new Bitmap(original);
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        for (int y = 0; y < original.Height; y++)
-                        {
-                            theColor = original.GetPixel(x, y);
-                            switch (mode) {
-                                case 1:
-                                    channelValue = theColor.R;
-                                    break;
-                                case 2:
-                                    channelValue = theColor.G;
-                                    break;
-                                case 3:
-                                    channelValue = theColor.B;
-                                    break;
-                                case 4: // desaturation
-                                    channelValue =  (minRGB(theColor.R, theColor.G, theColor.B) +  maxRGB(theColor.R, theColor.G, theColor.B))/2;
-                                    break;
-                                case 5: // decomp min
-                                    channelValue = minRGB(theColor.R, theColor.G, theColor.B);
-                                    break;
-                                case 6: // decomp max
-                                    channelValue = maxRGB(theColor.R, theColor.G, theColor.B);
-                                    break;
-                                default:
-                                    channelValue = theColor.G;
-                                    break;
-                            }
-                            theColor = Color.FromArgb(channelValue,channelValue,channelValue);
-                            newBitmap.SetPixel(x,y,theColor);
-                        }
-                    }
+                case 1:
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.RED);
+                    break;
+                case 2:
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.GREEN);
+                    break;
+                case 3:
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.BLUE);
+                    break;
+                case 4: // desaturation
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.DESATURATION);
+                    break;
+                case 5: // decomp min
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.DECOMPOSITION_MIN);
+                    break;
+                case 6: // decomp max
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.DECOMPOSITION_MAX);
                     break;
                 default:
+                    newBitmap = GrayScaleBitmap.grayScale(adjustedImage,pf,GrayScaleBitmap.GrayScaleMethod.AUTOMATIC);
                     break;
-
             }
+            pictureBox1.Image = newBitmap;
 
             lblImageAction.Text = "Done";
             Refresh();
-            return (newBitmap);
+            //return (newBitmap);
         }
 
         //Return a inverted colors version of a image
@@ -1642,6 +1610,8 @@ namespace CNCControl
             Y = image.Height;
             XX = (X / DPI) * (Single)2.54;
             YY = (Y / DPI) * (Single)2.54;
+            oldSizeX = XX;
+            oldSizeY = YY;
             ratio = X / Y;
             txtImgSizePixelX.Text = X.ToString();
             txtImgSizePixelY.Text = Y.ToString();
@@ -1826,8 +1796,8 @@ namespace CNCControl
             {
                 adjustedImage = imageToPrint;
                 AdjustImageSize();
-                adjustedImage = imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
-                pictureBox1.Image = adjustedImage;
+                imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
+                //pictureBox1.Image = adjustedImage;
             }
         }
 
@@ -1836,8 +1806,8 @@ namespace CNCControl
             if (rbNiveaux.Checked == false) return;
             adjustedImage = imageToPrint;
             AdjustImageSize();
-            adjustedImage = imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
-            pictureBox1.Image = adjustedImage;
+            imgGrayscale(adjustedImage, cbCanal.SelectedIndex);
+            //pictureBox1.Image = adjustedImage;
         }
 
         /// <summary>
@@ -1881,6 +1851,58 @@ namespace CNCControl
                 tbMatrice.Text += (255 - x).ToString() + ",";
             }
             tbMatrice.Text += ");";
+        }
+
+        private void button32_Click(object sender, EventArgs e)
+        {
+            AdjustImageSize();
+            pictureBox1.Image = adjustedImage;
+        }
+
+        private void button33_Click(object sender, EventArgs e)
+        {
+            txtImgSizeX.Text = oldSizeX.ToString("##0.00");
+            txtImgSizeY.Text = oldSizeY.ToString("##0.00");
+        }
+
+        private void button30_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button29_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button27_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void button34_Click(object sender, EventArgs e)
+        {
+            Bitmap img = new Bitmap(150, 10, PixelFormat.Format32bppArgb);
+            LockBitmap LockImg = new LockBitmap(img);
+            LockImg.LockBits();
+            Color indexColor = Color.FromArgb(255,255,255,255);
+            for (int x = 0; x < 150; x++)
+            {
+                for (int y = 0; y < 10; y++)
+                {
+                    LockImg.SetPixel(x, y, indexColor);
+                }
+            }
+            indexColor = Color.FromArgb(255, 0, 0, 0);
+            for (int x = 0; x < 150; x += 20)
+            {
+                for (int y = 0; y < 10; y++)
+                {
+                    LockImg.SetPixel(x, y, indexColor);
+                }
+            }
+            LockImg.UnlockBits();
+            pictureBox1.Image = img;
         }
 
 
