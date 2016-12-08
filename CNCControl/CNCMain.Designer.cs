@@ -65,6 +65,7 @@
             this.txtComReceive = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpImage = new System.Windows.Forms.TabPage();
+            this.button34 = new System.Windows.Forms.Button();
             this.button24 = new System.Windows.Forms.Button();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -149,7 +150,6 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pgBar = new System.Windows.Forms.ProgressBar();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.button34 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbUpdate)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -538,6 +538,16 @@
             this.tpImage.TabIndex = 1;
             this.tpImage.Text = "Image";
             this.tpImage.UseVisualStyleBackColor = true;
+            // 
+            // button34
+            // 
+            this.button34.Location = new System.Drawing.Point(491, 6);
+            this.button34.Name = "button34";
+            this.button34.Size = new System.Drawing.Size(140, 23);
+            this.button34.TabIndex = 28;
+            this.button34.Text = "create image";
+            this.button34.UseVisualStyleBackColor = true;
+            this.button34.Click += new System.EventHandler(this.button34_Click);
             // 
             // button24
             // 
@@ -1475,18 +1485,8 @@
             this.pgBar.Name = "pgBar";
             this.pgBar.Size = new System.Drawing.Size(1080, 23);
             this.pgBar.Step = 1;
-            this.pgBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.pgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.pgBar.TabIndex = 50;
-            // 
-            // button34
-            // 
-            this.button34.Location = new System.Drawing.Point(491, 6);
-            this.button34.Name = "button34";
-            this.button34.Size = new System.Drawing.Size(140, 23);
-            this.button34.TabIndex = 28;
-            this.button34.Text = "create image";
-            this.button34.UseVisualStyleBackColor = true;
-            this.button34.Click += new System.EventHandler(this.button34_Click);
             // 
             // CNCMain
             // 

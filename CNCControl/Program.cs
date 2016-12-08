@@ -16,7 +16,8 @@ namespace CNCControl
         {
             //Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new CNCMain());
+            Application.Run(new Form1());
+            //Application.Run(new CNCMain());
             //Application.Run(new test());
         }
     }
